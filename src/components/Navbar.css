@@ -1,0 +1,141 @@
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  background: #1f2933;
+  color: #fff;
+  padding: 12px 28px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.18);
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.5px;
+}
+
+.navbar-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  font-size: 15px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #2b6cb0, #6b46c1);
+  box-shadow: 0 4px 12px rgba(43, 108, 176, 0.4);
+}
+
+.navbar-links {
+  display: flex;
+  gap: 8px;
+}
+
+.navbar-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #cbd2d9;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: 999px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.navbar-link-icon {
+  font-size: 14px;
+}
+
+.navbar-links a.active,
+.navbar-links a:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.navbar-links a.active {
+  background: linear-gradient(135deg, rgba(43, 108, 176, 0.55), rgba(107, 70, 193, 0.55));
+}
+
+.navbar-user {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.navbar-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.navbar-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #2b6cb0, #6b46c1);
+}
+
+.navbar-profile-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.navbar-username {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.navbar-role {
+  font-size: 11px;
+  color: #9aa5b1;
+  text-transform: capitalize;
+}
+
+.navbar-logout {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.navbar-logout:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+@media (max-width: 720px) {
+  .navbar {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .navbar-profile-text {
+    display: none;
+  }
+}

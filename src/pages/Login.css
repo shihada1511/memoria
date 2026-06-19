@@ -1,0 +1,223 @@
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(62, 158, 255, 0.25), transparent 45%),
+    radial-gradient(circle at 85% 80%, rgba(122, 92, 255, 0.25), transparent 45%),
+    linear-gradient(135deg, #1f2933, #323f4b 55%, #1f2933);
+}
+
+.login-shell {
+  display: flex;
+  width: 100%;
+  max-width: 880px;
+  min-height: 520px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
+}
+
+.login-showcase {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+  padding: 48px;
+  color: #fff;
+  background: linear-gradient(160deg, #2b6cb0, #6b46c1);
+}
+
+.login-showcase-badge {
+  align-self: flex-start;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(6px);
+}
+
+.login-showcase h2 {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.25;
+}
+
+.login-showcase p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 320px;
+}
+
+.login-showcase-list {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.login-showcase-list li {
+  position: relative;
+  padding-left: 22px;
+}
+
+.login-showcase-list li::before {
+  content: '\2713';
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-weight: 700;
+  color: #9ae6b4;
+}
+
+.login-card {
+  flex: 1;
+  background: #ffffff;
+  padding: 48px 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.login-card h1 {
+  margin: 0 0 6px;
+  font-size: 26px;
+  color: #1f2933;
+}
+
+.login-subtitle {
+  margin: 0 0 28px;
+  color: #616e7c;
+  font-size: 14px;
+}
+
+.login-card label {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #3e4c59;
+}
+
+.login-field {
+  display: flex;
+  align-items: center;
+  border: 1px solid #cbd2d9;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  background: #f8fafc;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.login-field:focus-within {
+  border-color: #3e9eff;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(62, 158, 255, 0.15);
+}
+
+.login-field-invalid {
+  border-color: #e12d39;
+}
+
+.login-field-icon {
+  width: 40px;
+  text-align: center;
+  font-size: 14px;
+  color: #9aa5b1;
+}
+
+.login-field input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 12px 14px 12px 0;
+  font-size: 14px;
+  color: #1f2933;
+}
+
+.field-error {
+  color: #e12d39;
+  font-size: 12px;
+  margin-bottom: 14px;
+}
+
+.server-error {
+  background: #ffe3e3;
+  color: #cf1124;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+
+.login-card button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #2b6cb0, #6b46c1);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 13px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+  box-shadow: 0 8px 20px rgba(43, 108, 176, 0.35);
+}
+
+.login-card button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(107, 70, 193, 0.4);
+}
+
+.login-card button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.login-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: login-spin 0.7s linear infinite;
+}
+
+@keyframes login-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 720px) {
+  .login-shell {
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .login-showcase {
+    padding: 36px;
+  }
+
+  .login-card {
+    padding: 36px 30px;
+  }
+}

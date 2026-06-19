@@ -1,0 +1,54 @@
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 28px;
+  margin-top: auto;
+  background: #1f2933;
+  color: #cbd2d9;
+  border-top: 3px solid transparent;
+  border-image: linear-gradient(90deg, #2b6cb0, #6b46c1) 1;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.footer-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, #2b6cb0, #6b46c1);
+}
+
+.footer-brand div {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.4;
+}
+
+.footer-team {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.footer-slogan {
+  font-size: 12px;
+  color: #9aa5b1;
+}
+
+.footer-year {
+  font-size: 12px;
+  color: #9aa5b1;
+}

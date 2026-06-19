@@ -1,0 +1,316 @@
+.settings-hero {
+  background: linear-gradient(135deg, #1f2933, #2b6cb0 65%, #6b46c1);
+  color: #fff;
+  border-radius: 14px;
+  padding: 28px 32px;
+  margin-bottom: 28px;
+  box-shadow: 0 12px 28px rgba(31, 41, 51, 0.18);
+}
+
+.settings-hero-eyebrow {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.16);
+  margin-bottom: 10px;
+}
+
+.settings-hero h1 {
+  margin: 0 0 6px;
+  font-size: 26px;
+}
+
+.settings-hero .settings-subtitle {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.settings-skeleton {
+  height: 320px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #e4e7eb 25%, #f4f6f8 37%, #e4e7eb 63%);
+  background-size: 400% 100%;
+  animation: settings-shimmer 1.4s ease infinite;
+}
+
+@keyframes settings-shimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+.settings-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(220px, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.settings-form {
+  background: #fff;
+  border-radius: 14px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.settings-form h2 {
+  margin: 0 0 20px;
+  font-size: 17px;
+  color: #1f2933;
+}
+
+.settings-form label {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #3e4c59;
+}
+
+.settings-field {
+  display: flex;
+  align-items: center;
+  border: 1px solid #cbd2d9;
+  border-radius: 8px;
+  margin-bottom: 4px;
+  background: #f8fafc;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.settings-field:focus-within {
+  border-color: #3e9eff;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(62, 158, 255, 0.15);
+}
+
+.settings-field-invalid {
+  border-color: #e12d39;
+}
+
+.settings-field-icon {
+  width: 40px;
+  text-align: center;
+  font-size: 14px;
+  color: #9aa5b1;
+}
+
+.settings-field input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 12px 14px 12px 0;
+  font-size: 14px;
+  color: #1f2933;
+}
+
+.settings-field-toggle {
+  width: 40px;
+  height: 100%;
+  border: none;
+  background: transparent;
+  font-size: 15px;
+  color: #9aa5b1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0 8px 8px 0;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.settings-field-toggle:hover {
+  color: #3e9eff;
+  background: rgba(62, 158, 255, 0.08);
+}
+
+.settings-form-hint {
+  margin: -12px 0 16px;
+  font-size: 13px;
+  color: #9aa5b1;
+}
+
+.theme-options {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.theme-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 10px;
+  border: 1px solid #cbd2d9;
+  border-radius: 10px;
+  background: #f8fafc;
+  font-size: 13px;
+  font-weight: 600;
+  color: #616e7c;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.theme-option-icon {
+  font-size: 20px;
+}
+
+.theme-option:hover {
+  transform: translateY(-1px);
+}
+
+.theme-option-selected {
+  border-color: #3e9eff;
+  background: rgba(62, 158, 255, 0.1);
+  color: #1f2933;
+  box-shadow: 0 0 0 3px rgba(62, 158, 255, 0.12);
+}
+
+.field-error {
+  color: #e12d39;
+  font-size: 12px;
+  margin-bottom: 14px;
+}
+
+.settings-success {
+  background: #e3f9e5;
+  color: #1f7a32;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  margin-bottom: 14px;
+  margin-top: 6px;
+}
+
+.settings-error {
+  background: #ffe3e3;
+  color: #cf1124;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  margin-bottom: 14px;
+  margin-top: 6px;
+}
+
+.settings-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #2b6cb0, #6b46c1);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 13px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+  box-shadow: 0 8px 20px rgba(43, 108, 176, 0.35);
+}
+
+.settings-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(107, 70, 193, 0.4);
+}
+
+.settings-submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.settings-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: settings-spin 0.7s linear infinite;
+}
+
+@keyframes settings-spin {
+  to { transform: rotate(360deg); }
+}
+
+.settings-preview {
+  background: #fff;
+  border-radius: 14px;
+  padding: 28px 22px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.settings-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  margin: 0 auto 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #2b6cb0, #6b46c1);
+}
+
+.settings-preview h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  color: #1f2933;
+}
+
+.settings-preview-email {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: #9aa5b1;
+  word-break: break-word;
+}
+
+.settings-preview-theme {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #f4f6f8;
+  font-size: 13px;
+  font-weight: 600;
+  color: #3e4c59;
+}
+
+.settings-preview-tip {
+  text-align: left;
+}
+
+.settings-tip-icon {
+  font-size: 28px;
+  margin-bottom: 12px;
+}
+
+.settings-preview-tip h3 {
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.settings-preview-tip p {
+  margin: 0;
+  font-size: 13px;
+  color: #616e7c;
+  line-height: 1.5;
+}
+
+@media (max-width: 760px) {
+  .settings-layout {
+    grid-template-columns: 1fr;
+  }
+}
