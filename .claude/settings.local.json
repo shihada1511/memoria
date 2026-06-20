@@ -33,7 +33,16 @@
       "Bash(git --version)",
       "Bash(git init *)",
       "Bash(git add *)",
-      "Bash(git -c user.email=\"local@memoria.dev\" -c user.name=\"Memoria Local Snapshot\" commit -q -m \"Baseline snapshot before Assignment 4 restructure\")"
+      "Bash(git -c user.email=\"local@memoria.dev\" -c user.name=\"Memoria Local Snapshot\" commit -q -m \"Baseline snapshot before Assignment 4 restructure\")",
+      "Bash(mkdir -p backend/src/controllers backend/src/routers backend/src/middleware)",
+      "Bash(git mv *)",
+      "Bash(rmdir controllers *)",
+      "Bash(git rm *)",
+      "Bash(npx sequelize-cli *)",
+      "Bash(node -e \"const db = require\\('./models'\\); console.log\\(Object.keys\\(db\\)\\);\")",
+      "Bash(node --check seeders/20260619170516-demo-data.js)",
+      "Bash(node -e \"console.log\\(require.resolve\\('react-scripts/package.json'\\)\\); console.log\\(require.resolve\\('react/package.json'\\)\\); console.log\\(require.resolve\\('axios/package.json'\\)\\);\")",
+      "Bash(npm start *)"
     ]
   }
 }

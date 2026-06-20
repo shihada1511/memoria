@@ -1,0 +1,118 @@
+.dashboard-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #1f2933, #2b6cb0 65%, #6b46c1);
+  color: #fff;
+  border-radius: 14px;
+  padding: 28px 32px;
+  margin-bottom: 28px;
+  box-shadow: 0 12px 28px rgba(31, 41, 51, 0.18);
+}
+
+.dashboard-hero-eyebrow {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.16);
+  margin-bottom: 10px;
+}
+
+.dashboard-hero h1 {
+  margin: 0 0 6px;
+  font-size: 26px;
+}
+
+.dashboard-hero .dashboard-subtitle {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.dashboard-status {
+  color: #616e7c;
+}
+
+.dashboard-error {
+  color: #cf1124;
+}
+
+.dashboard-empty {
+  text-align: center;
+  color: #9aa5b1;
+  padding: 28px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px dashed #cbd2d9;
+}
+
+.dashboard-stats,
+.dashboard-decks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.dashboard-skeleton {
+  height: 128px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #e4e7eb 25%, #f4f6f8 37%, #e4e7eb 63%);
+  background-size: 400% 100%;
+  animation: dashboard-shimmer 1.4s ease infinite;
+}
+
+@keyframes dashboard-shimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+.dashboard-section-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-top: 36px;
+  margin-bottom: 16px;
+}
+
+.dashboard-section-header h2 {
+  margin: 0;
+  font-size: 19px;
+  color: #1f2933;
+}
+
+.dashboard-section-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: #9aa5b1;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dashboard-question {
+  font-weight: 600;
+  color: #1f2933;
+}
+
+.dashboard-answer {
+  color: #616e7c;
+  line-height: 1.5;
+}
+
+.dashboard-badge-blue { background: rgba(62, 158, 255, 0.14); color: #1c64c2; }
+.dashboard-badge-purple { background: rgba(107, 70, 193, 0.14); color: #6b46c1; }
+.dashboard-badge-green { background: rgba(31, 157, 85, 0.14); color: #1f9d55; }
+.dashboard-badge-amber { background: rgba(214, 158, 46, 0.14); color: #b7791f; }
+
+.dashboard-deck-select {
+  font-size: 0.82rem;
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e0;
+  background: #fff;
+  color: #2d3748;
+  cursor: pointer;
+}

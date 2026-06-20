@@ -1,0 +1,58 @@
+require('dotenv').config();
+
+const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
+const cors = require('cors');
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: '*',
+        methods: ['GET', 'POST']
+    }
+});
+
+const logger = require('./middleware/logger');
+const userRoutes = require('./routers/userRoutes');
+const adminRoutes = require('./routers/adminRoutes');
+const deckRoutes = require('./routers/deckRoutes');
+const cardRoutes = require('./routers/cardRoutes');
+const authRoutes = require('./routers/authRoutes');
+const settingsRoutes = require('./routers/settingsRoutes');
+const aiRoutes = require('./routers/aiRoutes');
+const socketHandler = require('./socket/socketHandler');
+const { sequelize } = require('../models');
+
+app.use(cors());
+app.use(express.json());
+app.use(logger);
+
+app.get('/', (req, res) => {
+    res.json({ message: "Memoria API is running!" });
+});
+
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/admins', adminRoutes);
+app.use('/api/decks', deckRoutes);
+app.use('/api/cards', cardRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/ai', aiRoutes);
+
+socketHandler(io);
+
+const PORT = process.env.PORT || 3000;
+
+sequelize.authenticate()
+    .then(() => {
+        console.log('Database connection established successfully.');
+        server.listen(PORT, () => {
+            console.log(`Server is successfully running on http://localhost:${PORT}`);
+        });
+    })
+    .catch((error) => {
+        console.error('Unable to connect to the database:', error.message);
+        process.exit(1);
+    });
