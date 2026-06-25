@@ -33,20 +33,20 @@
 }
 
 .dashboard-status {
-  color: #616e7c;
+  color: var(--text-secondary);
 }
 
 .dashboard-error {
-  color: #cf1124;
+  color: var(--danger);
 }
 
 .dashboard-empty {
   text-align: center;
-  color: #9aa5b1;
+  color: var(--text-muted);
   padding: 28px;
-  background: #fff;
+  background: var(--surface);
   border-radius: 12px;
-  border: 1px dashed #cbd2d9;
+  border: 1px dashed var(--border-strong);
 }
 
 .dashboard-stats,
@@ -60,7 +60,7 @@
 .dashboard-skeleton {
   height: 128px;
   border-radius: 12px;
-  background: linear-gradient(90deg, #e4e7eb 25%, #f4f6f8 37%, #e4e7eb 63%);
+  background: linear-gradient(90deg, var(--border) 25%, var(--surface-alt) 37%, var(--border) 63%);
   background-size: 400% 100%;
   animation: dashboard-shimmer 1.4s ease infinite;
 }
@@ -81,38 +81,141 @@
 .dashboard-section-header h2 {
   margin: 0;
   font-size: 19px;
-  color: #1f2933;
+  color: var(--text);
 }
 
 .dashboard-section-count {
   font-size: 12px;
   font-weight: 600;
-  color: #9aa5b1;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .dashboard-question {
   font-weight: 600;
-  color: #1f2933;
+  color: var(--text);
 }
 
 .dashboard-answer {
-  color: #616e7c;
+  color: var(--text-secondary);
   line-height: 1.5;
 }
 
-.dashboard-badge-blue { background: rgba(62, 158, 255, 0.14); color: #1c64c2; }
-.dashboard-badge-purple { background: rgba(107, 70, 193, 0.14); color: #6b46c1; }
-.dashboard-badge-green { background: rgba(31, 157, 85, 0.14); color: #1f9d55; }
-.dashboard-badge-amber { background: rgba(214, 158, 46, 0.14); color: #b7791f; }
+.dashboard-badge-blue { background: var(--accent-blue-soft); color: var(--accent-blue); }
+.dashboard-badge-purple { background: var(--accent-purple-soft); color: var(--accent-purple); }
+.dashboard-badge-green { background: var(--accent-green-soft); color: var(--accent-green); }
+.dashboard-badge-amber { background: var(--accent-amber-soft); color: var(--accent-amber); }
 
 .dashboard-deck-select {
   font-size: 0.82rem;
   padding: 4px 10px;
   border-radius: 8px;
-  border: 1px solid #cbd5e0;
-  background: #fff;
-  color: #2d3748;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
   cursor: pointer;
+}
+
+.dashboard-section-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dashboard-add-btn {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid #2b6cb0;
+  background: #2b6cb0;
+  color: #fff;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.dashboard-add-btn:hover:not(:disabled) { opacity: 0.85; }
+.dashboard-add-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.dashboard-inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.dashboard-form-input {
+  flex: 1 1 200px;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  font-size: 0.88rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--surface);
+}
+.dashboard-form-input:focus {
+  outline: none;
+  border-color: #2b6cb0;
+}
+
+.dashboard-form-submit {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: none;
+  background: #1f9d55;
+  color: #fff;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.dashboard-form-submit:hover:not(:disabled) { opacity: 0.85; }
+.dashboard-form-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.dashboard-form-error {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.82rem;
+}
+
+.dashboard-delete-btn {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--danger);
+  background: var(--surface);
+  color: var(--danger);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.dashboard-delete-btn:hover {
+  background: var(--danger);
+  color: #fff;
+}
+
+.dashboard-delete-btn-sm {
+  padding: 4px 8px;
+  font-size: 0.85rem;
+}
+
+.dashboard-hidden-cards {
+  text-align: center;
+  padding: 28px;
+  background: var(--surface);
+  border-radius: 12px;
+  border: 1px dashed var(--border-strong);
+  color: var(--text-secondary);
+}
+
+.dashboard-hidden-cards p {
+  margin: 0 0 12px;
 }

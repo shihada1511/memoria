@@ -1,0 +1,82 @@
+.manage-users-hero {
+  background: linear-gradient(135deg, #1f2933, #2b6cb0 65%, #6b46c1);
+  color: #fff;
+  border-radius: 14px;
+  padding: 28px 32px;
+  margin-bottom: 28px;
+  box-shadow: 0 12px 28px rgba(31, 41, 51, 0.18);
+}
+
+.manage-users-eyebrow {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.16);
+  margin-bottom: 10px;
+}
+
+.manage-users-hero h1 {
+  margin: 0 0 6px;
+  font-size: 26px;
+}
+
+.manage-users-subtitle {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.manage-users-status {
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.manage-users-error {
+  color: var(--danger);
+}
+
+.manage-users-name {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.manage-users-you {
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.manage-users-role-select {
+  font-size: 0.82rem;
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.manage-users-delete-btn {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--danger);
+  background: var(--surface);
+  color: var(--danger);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.manage-users-delete-btn:hover {
+  background: var(--danger);
+  color: #fff;
+}
+
+.manage-users-locked {
+  font-size: 0.9rem;
+  opacity: 0.5;
+}

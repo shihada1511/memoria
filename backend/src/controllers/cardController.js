@@ -3,6 +3,8 @@ const { Card, Deck } = require('../../models');
 const getCardsByDeck = async (req, res) => {
     try {
         const deckId = parseInt(req.params.deckId);
+        const requesterId = parseInt(req.header('x-user-id'));
+        const requesterRole = req.header('x-user-role');
 
         const deckExists = await Deck.findByPk(deckId);
         if (!deckExists) {
@@ -10,6 +12,14 @@ const getCardsByDeck = async (req, res) => {
                 success: false,
                 data: null,
                 error: { code: "NOT_FOUND", message: `Deck with ID ${deckId} not found.`, details: {} }
+            });
+        }
+
+        if (requesterRole !== 'admin' && deckExists.userId !== requesterId) {
+            return res.status(403).json({
+                success: false,
+                data: null,
+                error: { code: "FORBIDDEN", message: "You do not have access to this deck.", details: {} }
             });
         }
 
@@ -24,6 +34,8 @@ const getCardById = async (req, res) => {
     try {
         const deckId = parseInt(req.params.deckId);
         const cardId = parseInt(req.params.cardId);
+        const requesterId = parseInt(req.header('x-user-id'));
+        const requesterRole = req.header('x-user-role');
 
         const deckExists = await Deck.findByPk(deckId);
         if (!deckExists) {
@@ -31,6 +43,14 @@ const getCardById = async (req, res) => {
                 success: false,
                 data: null,
                 error: { code: "NOT_FOUND", message: `Deck with ID ${deckId} not found.`, details: {} }
+            });
+        }
+
+        if (requesterRole !== 'admin' && deckExists.userId !== requesterId) {
+            return res.status(403).json({
+                success: false,
+                data: null,
+                error: { code: "FORBIDDEN", message: "You do not have access to this deck.", details: {} }
             });
         }
 

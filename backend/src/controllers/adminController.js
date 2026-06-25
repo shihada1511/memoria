@@ -33,16 +33,16 @@ const getAdminById = async (req, res) => {
 
 const createAdmin = async (req, res) => {
     try {
-        const { firstName, lastName, email, password } = req.body;
+        const { firstName, lastName, username, email, password } = req.body;
 
-        if (!firstName || !lastName || !email || !password) {
+        if (!firstName || !lastName || !username || !email || !password) {
             return res.status(400).json({
                 success: false,
                 data: null,
                 error: {
                     code: "VALIDATION_ERROR",
                     message: "Missing required fields.",
-                    details: { required: ["firstName", "lastName", "email", "password"] }
+                    details: { required: ["firstName", "lastName", "username", "email", "password"] }
                 }
             });
         }
@@ -57,7 +57,7 @@ const createAdmin = async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newAdmin = await Admin.create({ firstName, lastName, email, password: hashedPassword });
+        const newAdmin = await Admin.create({ firstName, lastName, username, email, password: hashedPassword });
 
         res.status(201).json({ success: true, data: { adminId: newAdmin.id }, error: null });
     } catch (error) {

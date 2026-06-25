@@ -1,0 +1,467 @@
+{
+  "info": {
+    "name": "Memoria API",
+    "description": "Full API collection for the Memoria flashcard app (auth, users, admins, settings, decks, cards, AI generation). All responses follow { success, data, error }.\n\nLogin first — the Login request auto-saves `token`, `userId`, and `userRole` as collection variables used by every other request.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000/api" },
+    { "key": "token", "value": "" },
+    { "key": "userId", "value": "" },
+    { "key": "userRole", "value": "" },
+    { "key": "deckId", "value": "1" },
+    { "key": "cardId", "value": "1" },
+    { "key": "tagId", "value": "1" },
+    { "key": "adminId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success) {",
+                  "    pm.collectionVariables.set('token', res.data.token);",
+                  "    pm.collectionVariables.set('userId', res.data.user.userId);",
+                  "    pm.collectionVariables.set('userRole', res.data.user.userRole);",
+                  "    console.log('Logged in as', res.data.user.userRole, res.data.user.userId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"mshihada@memoria.dev\",\n  \"password\": \"Passw0rd!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/auth/logout", "host": ["{{baseUrl}}"], "path": ["auth", "logout"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/users/me", "host": ["{{baseUrl}}"], "path": ["users", "me"] }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"Passw0rd!\",\n  \"newPassword\": \"NewPassw0rd!\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/users/me/password", "host": ["{{baseUrl}}"], "path": ["users", "me", "password"] }
+          }
+        },
+        {
+          "name": "List Users (admin/manager)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-user-id", "value": "{{userId}}" },
+              { "key": "x-user-role", "value": "{{userRole}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] }
+          }
+        },
+        {
+          "name": "Get User By Id (admin/manager)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-user-id", "value": "{{userId}}" },
+              { "key": "x-user-role", "value": "{{userRole}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/users/2", "host": ["{{baseUrl}}"], "path": ["users", "2"] }
+          }
+        },
+        {
+          "name": "Create User (sign up — always role 'user')",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"New\",\n  \"lastName\": \"Person\",\n  \"username\": \"newperson\",\n  \"email\": \"newperson@example.com\",\n  \"password\": \"MyPass123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] }
+          }
+        },
+        {
+          "name": "Update User (name/role)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-user-id", "value": "{{userId}}" },
+              { "key": "x-user-role", "value": "{{userRole}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Sara\",\n  \"lastName\": \"Khalil\",\n  \"userRole\": \"manager\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/users/2", "host": ["{{baseUrl}}"], "path": ["users", "2"] }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "x-user-id", "value": "{{userId}}" },
+              { "key": "x-user-role", "value": "{{userRole}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/users/2", "host": ["{{baseUrl}}"], "path": ["users", "2"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admins (admin-only)",
+      "item": [
+        {
+          "name": "List Admins",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-user-id", "value": "{{userId}}" },
+              { "key": "x-user-role", "value": "{{userRole}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/admins", "host": ["{{baseUrl}}"], "path": ["admins"] }
+          }
+        },
+        {
+          "name": "Get Admin By Id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-user-id", "value": "{{userId}}" },
+              { "key": "x-user-role", "value": "{{userRole}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/admins/{{adminId}}", "host": ["{{baseUrl}}"], "path": ["admins", "{{adminId}}"] }
+          }
+        },
+        {
+          "name": "Create Admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-user-id", "value": "{{userId}}" },
+              { "key": "x-user-role", "value": "{{userRole}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"New\",\n  \"lastName\": \"Admin\",\n  \"username\": \"newadmin\",\n  \"email\": \"newadmin@memoria.dev\",\n  \"password\": \"AdminPass123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/admins", "host": ["{{baseUrl}}"], "path": ["admins"] }
+          }
+        },
+        {
+          "name": "Update Admin",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-user-id", "value": "{{userId}}" },
+              { "key": "x-user-role", "value": "{{userRole}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Site\",\n  \"lastName\": \"Admin\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/admins/{{adminId}}", "host": ["{{baseUrl}}"], "path": ["admins", "{{adminId}}"] }
+          }
+        },
+        {
+          "name": "Delete Admin",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "x-user-id", "value": "{{userId}}" },
+              { "key": "x-user-role", "value": "{{userRole}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/admins/{{adminId}}", "host": ["{{baseUrl}}"], "path": ["admins", "{{adminId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Settings",
+      "item": [
+        {
+          "name": "Get Settings",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/settings", "host": ["{{baseUrl}}"], "path": ["settings"] }
+          }
+        },
+        {
+          "name": "Update Settings",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"mshihada\",\n  \"email\": \"mshihada@memoria.dev\",\n  \"theme\": \"dark\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/settings", "host": ["{{baseUrl}}"], "path": ["settings"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Decks",
+      "item": [
+        {
+          "name": "List My Decks",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-user-id", "value": "{{userId}}" },
+              { "key": "x-user-role", "value": "{{userRole}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/decks", "host": ["{{baseUrl}}"], "path": ["decks"] }
+          }
+        },
+        {
+          "name": "Get Deck By Id (with cards)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-user-id", "value": "{{userId}}" },
+              { "key": "x-user-role", "value": "{{userRole}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/decks/{{deckId}}", "host": ["{{baseUrl}}"], "path": ["decks", "{{deckId}}"] }
+          }
+        },
+        {
+          "name": "Create Deck",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success) pm.collectionVariables.set('deckId', res.data.deckId);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-user-id", "value": "{{userId}}" },
+              { "key": "x-user-role", "value": "{{userRole}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": {{userId}},\n  \"title\": \"World History\",\n  \"subject\": \"History\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/decks", "host": ["{{baseUrl}}"], "path": ["decks"] }
+          }
+        },
+        {
+          "name": "Update Deck",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-user-id", "value": "{{userId}}" },
+              { "key": "x-user-role", "value": "{{userRole}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"World History (Updated)\",\n  \"subject\": \"History\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/decks/{{deckId}}", "host": ["{{baseUrl}}"], "path": ["decks", "{{deckId}}"] }
+          }
+        },
+        {
+          "name": "Delete Deck",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "x-user-id", "value": "{{userId}}" },
+              { "key": "x-user-role", "value": "{{userRole}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/decks/{{deckId}}", "host": ["{{baseUrl}}"], "path": ["decks", "{{deckId}}"] }
+          }
+        },
+        {
+          "name": "Add Tag to Deck",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-user-id", "value": "{{userId}}" },
+              { "key": "x-user-role", "value": "{{userRole}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tagName\": \"exam-prep\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/decks/{{deckId}}/tags", "host": ["{{baseUrl}}"], "path": ["decks", "{{deckId}}", "tags"] }
+          }
+        },
+        {
+          "name": "Remove Tag from Deck",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "x-user-id", "value": "{{userId}}" },
+              { "key": "x-user-role", "value": "{{userRole}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/decks/{{deckId}}/tags/{{tagId}}", "host": ["{{baseUrl}}"], "path": ["decks", "{{deckId}}", "tags", "{{tagId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cards",
+      "item": [
+        {
+          "name": "List Cards in Deck",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-user-id", "value": "{{userId}}" },
+              { "key": "x-user-role", "value": "{{userRole}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/decks/{{deckId}}/cards", "host": ["{{baseUrl}}"], "path": ["decks", "{{deckId}}", "cards"] }
+          }
+        },
+        {
+          "name": "Get Card By Id",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-user-id", "value": "{{userId}}" },
+              { "key": "x-user-role", "value": "{{userRole}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/decks/{{deckId}}/cards/{{cardId}}", "host": ["{{baseUrl}}"], "path": ["decks", "{{deckId}}", "cards", "{{cardId}}"] }
+          }
+        },
+        {
+          "name": "Create Card",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success) pm.collectionVariables.set('cardId', res.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-user-id", "value": "{{userId}}" },
+              { "key": "x-user-role", "value": "{{userRole}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"What year did WWII end?\",\n  \"answer\": \"1945\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/decks/{{deckId}}/cards", "host": ["{{baseUrl}}"], "path": ["decks", "{{deckId}}", "cards"] }
+          }
+        },
+        {
+          "name": "Update Card",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-user-id", "value": "{{userId}}" },
+              { "key": "x-user-role", "value": "{{userRole}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"What year did WWII end?\",\n  \"answer\": \"1945 (V-J Day, September 2)\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/decks/{{deckId}}/cards/{{cardId}}", "host": ["{{baseUrl}}"], "path": ["decks", "{{deckId}}", "cards", "{{cardId}}"] }
+          }
+        },
+        {
+          "name": "Delete Card",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "x-user-id", "value": "{{userId}}" },
+              { "key": "x-user-role", "value": "{{userRole}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/decks/{{deckId}}/cards/{{cardId}}", "host": ["{{baseUrl}}"], "path": ["decks", "{{deckId}}", "cards", "{{cardId}}"] }
+          }
+        },
+        {
+          "name": "List All Cards (admin-only)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "x-user-id", "value": "{{userId}}" },
+              { "key": "x-user-role", "value": "{{userRole}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/cards", "host": ["{{baseUrl}}"], "path": ["cards"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI",
+      "item": [
+        {
+          "name": "Generate Cards",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"topic\": \"The French Revolution\",\n  \"count\": 5\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/ai/generate-cards", "host": ["{{baseUrl}}"], "path": ["ai", "generate-cards"] }
+          }
+        }
+      ]
+    }
+  ]
+}

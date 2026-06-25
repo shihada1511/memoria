@@ -1,0 +1,60 @@
+:root {
+  --bg: #f4f6f8;
+  --surface: #ffffff;
+  --surface-alt: #f8fafc;
+  --text: #1f2933;
+  --text-secondary: #616e7c;
+  --text-muted: #9aa5b1;
+  --border: #e4e7eb;
+  --border-strong: #cbd2d9;
+  --shadow-sm: rgba(0, 0, 0, 0.04);
+  --shadow-md: rgba(31, 41, 51, 0.1);
+
+  --accent-blue: #3e9eff;
+  --accent-blue-soft: rgba(62, 158, 255, 0.12);
+  --accent-purple: #6b46c1;
+  --accent-purple-soft: rgba(107, 70, 193, 0.14);
+  --accent-green: #1f9d55;
+  --accent-green-soft: rgba(31, 157, 85, 0.14);
+  --accent-amber: #d69e2e;
+  --accent-amber-soft: rgba(214, 158, 46, 0.14);
+
+  --danger: #cf1124;
+  --danger-soft: #ffe3e3;
+  --success-bg: #e3f9e5;
+  --success-text: #1f7a32;
+
+  /* aliases kept for components already using this naming */
+  --color-base: var(--surface);
+  --color-text: var(--text);
+  --color-subtext: var(--text-secondary);
+  --color-overlay: var(--text-muted);
+  --color-border: var(--border);
+}
+
+[data-theme="dark"] {
+  --bg: #11151c;
+  --surface: #1b222c;
+  --surface-alt: #222b38;
+  --text: #e8ecf1;
+  --text-secondary: #aab4c2;
+  --text-muted: #6b7785;
+  --border: #2c3645;
+  --border-strong: #3a4555;
+  --shadow-sm: rgba(0, 0, 0, 0.4);
+  --shadow-md: rgba(0, 0, 0, 0.5);
+
+  --accent-blue: #5eb0ff;
+  --accent-blue-soft: rgba(94, 176, 255, 0.18);
+  --accent-purple: #a78bfa;
+  --accent-purple-soft: rgba(167, 139, 250, 0.18);
+  --accent-green: #4ade80;
+  --accent-green-soft: rgba(74, 222, 128, 0.16);
+  --accent-amber: #fbbf24;
+  --accent-amber-soft: rgba(251, 191, 36, 0.16);
+
+  --danger: #f87171;
+  --danger-soft: rgba(248, 113, 113, 0.15);
+  --success-bg: rgba(74, 222, 128, 0.15);
+  --success-text: #4ade80;
+}

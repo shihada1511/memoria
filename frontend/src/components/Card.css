@@ -1,23 +1,23 @@
 .memoria-card {
   position: relative;
-  background: #ffffff;
-  border: 1px solid #e4e7eb;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 6px var(--shadow-sm);
   border-top: 3px solid transparent;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease, border-color 0.2s ease;
 }
 
 .memoria-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 28px rgba(31, 41, 51, 0.1);
+  box-shadow: 0 12px 28px var(--shadow-md);
 }
 
-.memoria-card-blue { border-top-color: #3e9eff; }
-.memoria-card-purple { border-top-color: #6b46c1; }
-.memoria-card-green { border-top-color: #1f9d55; }
-.memoria-card-amber { border-top-color: #d69e2e; }
+.memoria-card-blue { border-top-color: var(--accent-blue); }
+.memoria-card-purple { border-top-color: var(--accent-purple); }
+.memoria-card-green { border-top-color: var(--accent-green); }
+.memoria-card-amber { border-top-color: var(--accent-amber); }
 
 .memoria-card-icon {
   display: inline-flex;
@@ -28,42 +28,42 @@
   border-radius: 10px;
   font-size: 18px;
   margin-bottom: 12px;
-  background: #f4f6f8;
+  background: var(--surface-alt);
 }
 
-.memoria-card-blue .memoria-card-icon { background: rgba(62, 158, 255, 0.12); }
-.memoria-card-purple .memoria-card-icon { background: rgba(107, 70, 193, 0.12); }
-.memoria-card-green .memoria-card-icon { background: rgba(31, 157, 85, 0.12); }
-.memoria-card-amber .memoria-card-icon { background: rgba(214, 158, 46, 0.12); }
+.memoria-card-blue .memoria-card-icon { background: var(--accent-blue-soft); }
+.memoria-card-purple .memoria-card-icon { background: var(--accent-purple-soft); }
+.memoria-card-green .memoria-card-icon { background: var(--accent-green-soft); }
+.memoria-card-amber .memoria-card-icon { background: var(--accent-amber-soft); }
 
 .memoria-card-title {
   margin: 0 0 6px;
   font-size: 17px;
-  color: #1f2933;
+  color: var(--text);
 }
 
 .memoria-card-subtitle {
   margin: 0 0 8px;
   font-size: 12px;
-  color: #3e9eff;
+  color: var(--accent-blue);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.memoria-card-purple .memoria-card-subtitle { color: #6b46c1; }
-.memoria-card-green .memoria-card-subtitle { color: #1f9d55; }
-.memoria-card-amber .memoria-card-subtitle { color: #d69e2e; }
+.memoria-card-purple .memoria-card-subtitle { color: var(--accent-purple); }
+.memoria-card-green .memoria-card-subtitle { color: var(--accent-green); }
+.memoria-card-amber .memoria-card-subtitle { color: var(--accent-amber); }
 
 .memoria-card-description {
   margin: 0;
   font-size: 14px;
-  color: #616e7c;
+  color: var(--text-secondary);
   line-height: 1.5;
 }
 
 .memoria-card-footer {
   margin-top: 12px;
   font-size: 12px;
-  color: #9aa5b1;
+  color: var(--text-muted);
 }

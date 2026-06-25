@@ -7,9 +7,11 @@ const cors = require('cors');
 
 const app = express();
 const server = http.createServer(app);
+const FRONTEND_URL = process.env.FRONTEND_URL || '*';
+
 const io = new Server(server, {
     cors: {
-        origin: '*',
+        origin: FRONTEND_URL,
         methods: ['GET', 'POST']
     }
 });
@@ -25,7 +27,7 @@ const aiRoutes = require('./routers/aiRoutes');
 const socketHandler = require('./socket/socketHandler');
 const { sequelize } = require('../models');
 
-app.use(cors());
+app.use(cors({ origin: FRONTEND_URL }));
 app.use(express.json());
 app.use(logger);
 

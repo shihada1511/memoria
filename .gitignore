@@ -1,4 +1,5 @@
 node_modules/
+demo video/
 .env
 backend/.env
 frontend/.env
@@ -6,3 +7,4 @@ build/
 dist/
 *.log
 .idea/
+.claude/

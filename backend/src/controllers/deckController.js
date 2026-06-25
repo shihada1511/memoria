@@ -7,7 +7,12 @@ const DECK_INCLUDE = [
 
 const getAllDecks = async (req, res) => {
     try {
-        const decks = await Deck.findAll({ include: DECK_INCLUDE, order: [['id', 'ASC']] });
+        const requesterId = parseInt(req.header('x-user-id'));
+        const requesterRole = req.header('x-user-role');
+
+        const where = requesterRole === 'admin' ? {} : { userId: requesterId };
+
+        const decks = await Deck.findAll({ where, include: DECK_INCLUDE, order: [['id', 'ASC']] });
         res.status(200).json({ success: true, data: decks, error: null });
     } catch (error) {
         res.status(500).json({

@@ -1,17 +1,29 @@
 import React, { useState } from 'react';
 import api from '../services/api';
+import { createCard } from '../services/dashboardService';
 import './AIGenerator.css';
 
 /**
  * AIGenerator – lets the user describe a topic, calls POST /api/ai/generate-cards,
- * then shows a preview of the generated flashcards.
+ * shows a preview of the generated flashcards, and lets them save selected
+ * cards into one of their decks.
+ *
+ * Props:
+ *   decks         array of { id|deckId, title }
+ *   onCardsAdded  (deckId, createdCards[]) => void
  */
-const AIGenerator = () => {
+const AIGenerator = ({ decks = [], onCardsAdded }) => {
     const [topic, setTopic] = useState('');
     const [count, setCount] = useState(5);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [generatedCards, setGeneratedCards] = useState(null);
+
+    const [selectedDeckId, setSelectedDeckId] = useState('');
+    const [selectedCards, setSelectedCards] = useState(new Set());
+    const [adding, setAdding] = useState(false);
+    const [addError, setAddError] = useState('');
+    const [addSuccess, setAddSuccess] = useState('');
 
     const handleGenerate = async (e) => {
         e.preventDefault();
@@ -19,11 +31,15 @@ const AIGenerator = () => {
 
         setLoading(true);
         setError('');
+        setAddError('');
+        setAddSuccess('');
         setGeneratedCards(null);
 
         try {
             const res = await api.post('/ai/generate-cards', { topic: topic.trim(), count });
             setGeneratedCards(res.data.data);
+            setSelectedCards(new Set(res.data.data.cards.map((_, i) => i)));
+            setSelectedDeckId(String(decks[0]?.id ?? decks[0]?.deckId ?? ''));
         } catch (err) {
             setError(
                 err.response?.data?.error?.message ||
@@ -31,6 +47,37 @@ const AIGenerator = () => {
             );
         } finally {
             setLoading(false);
+        }
+    };
+
+    const toggleCard = (index) => {
+        setSelectedCards((prev) => {
+            const next = new Set(prev);
+            if (next.has(index)) next.delete(index);
+            else next.add(index);
+            return next;
+        });
+    };
+
+    const handleAddToDeck = async () => {
+        if (!selectedDeckId || selectedCards.size === 0) return;
+
+        setAdding(true);
+        setAddError('');
+        setAddSuccess('');
+        try {
+            const cardsToAdd = generatedCards.cards.filter((_, i) => selectedCards.has(i));
+            const created = await Promise.all(
+                cardsToAdd.map((c) => createCard(selectedDeckId, c.question, c.answer))
+            );
+            onCardsAdded?.(selectedDeckId, created);
+            setAddSuccess(`Added ${created.length} card${created.length === 1 ? '' : 's'} to your deck!`);
+            setGeneratedCards(null);
+            setSelectedCards(new Set());
+        } catch (err) {
+            setAddError(err.response?.data?.error?.message || 'Failed to add cards to deck.');
+        } finally {
+            setAdding(false);
         }
     };
 
@@ -74,6 +121,7 @@ const AIGenerator = () => {
             </form>
 
             {error && <p className="ai-generator-error">{error}</p>}
+            {addSuccess && <p className="ai-generator-success">{addSuccess}</p>}
 
             {generatedCards && (
                 <div className="ai-generator-results">
@@ -82,20 +130,57 @@ const AIGenerator = () => {
                             ✅ {generatedCards.cards.length} cards generated for "{generatedCards.topic}"
                         </span>
                     </div>
+
                     <div className="ai-generator-cards">
                         {generatedCards.cards.map((card, i) => (
-                            <div key={i} className="ai-generator-card">
-                                <div className="ai-generator-card-q">
-                                    <span className="ai-generator-card-label">Q</span>
-                                    {card.question}
+                            <label key={i} className="ai-generator-card ai-generator-card-selectable">
+                                <input
+                                    type="checkbox"
+                                    className="ai-generator-card-checkbox"
+                                    checked={selectedCards.has(i)}
+                                    onChange={() => toggleCard(i)}
+                                />
+                                <div className="ai-generator-card-content">
+                                    <div className="ai-generator-card-q">
+                                        <span className="ai-generator-card-label">Q</span>
+                                        {card.question}
+                                    </div>
+                                    <div className="ai-generator-card-a">
+                                        <span className="ai-generator-card-label ai-generator-card-label--a">A</span>
+                                        {card.answer}
+                                    </div>
                                 </div>
-                                <div className="ai-generator-card-a">
-                                    <span className="ai-generator-card-label ai-generator-card-label--a">A</span>
-                                    {card.answer}
-                                </div>
-                            </div>
+                            </label>
                         ))}
                     </div>
+
+                    <div className="ai-generator-add-row">
+                        {decks.length === 0 ? (
+                            <p className="ai-generator-hint">Create a deck first to save these cards.</p>
+                        ) : (
+                            <>
+                                <select
+                                    className="ai-generator-select ai-generator-deck-select"
+                                    value={selectedDeckId}
+                                    onChange={(e) => setSelectedDeckId(e.target.value)}
+                                    disabled={adding}
+                                >
+                                    {decks.map((d) => (
+                                        <option key={d.id ?? d.deckId} value={d.id ?? d.deckId}>{d.title}</option>
+                                    ))}
+                                </select>
+                                <button
+                                    type="button"
+                                    className="ai-generator-btn"
+                                    onClick={handleAddToDeck}
+                                    disabled={adding || selectedCards.size === 0}
+                                >
+                                    {adding ? 'Adding…' : `Add ${selectedCards.size} to deck`}
+                                </button>
+                            </>
+                        )}
+                    </div>
+                    {addError && <p className="ai-generator-error">{addError}</p>}
                 </div>
             )}
         </div>

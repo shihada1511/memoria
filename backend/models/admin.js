@@ -10,13 +10,19 @@ module.exports = (sequelize, DataTypes) => {
   Admin.init({
     firstName: { type: DataTypes.STRING, allowNull: false },
     lastName: { type: DataTypes.STRING, allowNull: false },
+    username: { type: DataTypes.STRING, allowNull: false, unique: true },
     email: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
       validate: { isEmail: true }
     },
-    password: { type: DataTypes.STRING, allowNull: false }
+    password: { type: DataTypes.STRING, allowNull: false },
+    theme: {
+      type: DataTypes.ENUM('light', 'dark', 'system'),
+      allowNull: false,
+      defaultValue: 'light'
+    }
   }, {
     sequelize,
     modelName: 'Admin',

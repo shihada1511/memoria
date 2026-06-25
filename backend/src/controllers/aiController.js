@@ -1,9 +1,9 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const OpenAI = require('openai');
 
 const getClient = () => {
     const key = process.env.AI_API_KEY;
     if (!key) return null;
-    return new GoogleGenerativeAI(key);
+    return new OpenAI({ apiKey: key, baseURL: 'https://api.groq.com/openai/v1' });
 };
 
 /**
@@ -52,30 +52,29 @@ Rules:
 - Cover different aspects of the topic
 - Do NOT number the cards
 
-Respond ONLY with a valid JSON array, no markdown, no extra text:
-[
-  { "question": "...", "answer": "..." },
-  ...
-]`;
+Respond ONLY with a valid JSON object of this exact form, no markdown, no extra text:
+{
+  "cards": [
+    { "question": "...", "answer": "..." },
+    ...
+  ]
+}`;
 
-        const model = client.getGenerativeModel({
-            model: 'gemini-2.0-flash',
-            generationConfig: {
-                temperature: 0.7,
-                maxOutputTokens: 2000,
-                responseMimeType: 'application/json'
-            }
+        const completion = await client.chat.completions.create({
+            model: 'llama-3.3-70b-versatile',
+            messages: [{ role: 'user', content: prompt }],
+            temperature: 0.7,
+            max_tokens: 2000,
+            response_format: { type: 'json_object' }
         });
 
-        const result = await model.generateContent(prompt);
-        const raw = result.response.text()?.trim() || '';
+        const raw = completion.choices[0]?.message?.content?.trim() || '';
 
         let cards;
         try {
-            // Strip optional markdown fences
-            const json = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-            cards = JSON.parse(json);
-            if (!Array.isArray(cards)) throw new Error('Expected array');
+            const parsed = JSON.parse(raw);
+            cards = parsed.cards;
+            if (!Array.isArray(cards)) throw new Error('Expected cards array');
         } catch {
             return res.status(500).json({
                 success: false,
@@ -101,8 +100,7 @@ Respond ONLY with a valid JSON array, no markdown, no extra text:
             error: null
         });
     } catch (error) {
-        const isAuthError = (error?.status === 400 || error?.status === 403) &&
-            /api key/i.test(error?.message || '');
+        const isAuthError = error?.status === 401;
         res.status(isAuthError ? 401 : 500).json({
             success: false,
             data: null,

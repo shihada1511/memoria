@@ -1,21 +1,26 @@
-const { User } = require('../../models');
+const { User, Admin } = require('../../models');
 
-const getUserIdFromToken = (req) => {
+// Tokens are base64("id:email:role"). Older tokens (pre-admin-login) omit the
+// role segment and always referred to a User, so default to 'user' for those.
+const getAuthFromToken = (req) => {
     const authHeader = req.header('authorization') || '';
     const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
 
     if (!token) return null;
 
-    const [userId] = Buffer.from(token, 'base64').toString('utf-8').split(':');
-    const parsed = parseInt(userId);
-    return Number.isNaN(parsed) ? null : parsed;
+    const [rawId, , rawRole] = Buffer.from(token, 'base64').toString('utf-8').split(':');
+    const id = parseInt(rawId);
+    if (Number.isNaN(id)) return null;
+    return { id, role: rawRole || 'user' };
 };
+
+const getModelForRole = (role) => (role === 'admin' ? Admin : User);
 
 const getSettings = async (req, res) => {
     try {
-        const userId = getUserIdFromToken(req);
+        const auth = getAuthFromToken(req);
 
-        if (!userId) {
+        if (!auth) {
             return res.status(401).json({
                 success: false,
                 data: null,
@@ -23,17 +28,17 @@ const getSettings = async (req, res) => {
             });
         }
 
-        const user = await User.findByPk(userId, { attributes: ['username', 'email', 'theme'] });
+        const account = await getModelForRole(auth.role).findByPk(auth.id, { attributes: ['username', 'email', 'theme'] });
 
-        if (!user) {
+        if (!account) {
             return res.status(404).json({
                 success: false,
                 data: null,
-                error: { code: "NOT_FOUND", message: "Settings not found for this user.", details: {} }
+                error: { code: "NOT_FOUND", message: "Settings not found for this account.", details: {} }
             });
         }
 
-        res.status(200).json({ success: true, data: user, error: null });
+        res.status(200).json({ success: true, data: account, error: null });
     } catch (error) {
         res.status(500).json({ success: false, data: null, error: { code: "SERVER_ERROR", message: "An unexpected error occurred.", details: {} } });
     }
@@ -41,9 +46,9 @@ const getSettings = async (req, res) => {
 
 const updateSettings = async (req, res) => {
     try {
-        const userId = getUserIdFromToken(req);
+        const auth = getAuthFromToken(req);
 
-        if (!userId) {
+        if (!auth) {
             return res.status(401).json({
                 success: false,
                 data: null,
@@ -65,18 +70,18 @@ const updateSettings = async (req, res) => {
             });
         }
 
-        const user = await User.findByPk(userId);
+        const account = await getModelForRole(auth.role).findByPk(auth.id);
 
-        if (!user) {
+        if (!account) {
             return res.status(404).json({
                 success: false,
                 data: null,
-                error: { code: "NOT_FOUND", message: "Settings not found for this user.", details: {} }
+                error: { code: "NOT_FOUND", message: "Settings not found for this account.", details: {} }
             });
         }
 
-        await user.update({ username, email, theme });
-        res.status(200).json({ success: true, data: { username: user.username, email: user.email, theme: user.theme }, error: null });
+        await account.update({ username, email, theme });
+        res.status(200).json({ success: true, data: { username: account.username, email: account.email, theme: account.theme }, error: null });
     } catch (error) {
         res.status(500).json({ success: false, data: null, error: { code: "SERVER_ERROR", message: "An unexpected error occurred.", details: {} } });
     }

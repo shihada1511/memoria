@@ -9,3 +9,23 @@ export const getCardsByDeck = async (deckId) => {
   const response = await api.get(`/decks/${deckId}/cards`);
   return response.data.data;
 };
+
+export const createDeck = async (userId, title, subject) => {
+  const response = await api.post('/decks', { userId, title, subject });
+  return response.data.data;
+};
+
+export const createCard = async (deckId, question, answer) => {
+  const response = await api.post(`/decks/${deckId}/cards`, { question, answer });
+  return response.data.data;
+};
+
+export const deleteDeck = async (deckId) => {
+  const response = await api.delete(`/decks/${deckId}`);
+  return response.data.data;
+};
+
+export const deleteCard = async (deckId, cardId) => {
+  const response = await api.delete(`/decks/${deckId}/cards/${cardId}`);
+  return response.data.data;
+};

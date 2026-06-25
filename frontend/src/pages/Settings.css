@@ -32,7 +32,7 @@
 .settings-skeleton {
   height: 320px;
   border-radius: 12px;
-  background: linear-gradient(90deg, #e4e7eb 25%, #f4f6f8 37%, #e4e7eb 63%);
+  background: linear-gradient(90deg, var(--border) 25%, var(--surface-alt) 37%, var(--border) 63%);
   background-size: 400% 100%;
   animation: settings-shimmer 1.4s ease infinite;
 }
@@ -50,40 +50,40 @@
 }
 
 .settings-form {
-  background: #fff;
+  background: var(--surface);
   border-radius: 14px;
   padding: 28px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 6px var(--shadow-sm);
 }
 
 .settings-form h2 {
   margin: 0 0 20px;
   font-size: 17px;
-  color: #1f2933;
+  color: var(--text);
 }
 
 .settings-form label {
   font-size: 13px;
   font-weight: 600;
   margin-bottom: 6px;
-  color: #3e4c59;
+  color: var(--text-secondary);
 }
 
 .settings-field {
   display: flex;
   align-items: center;
-  border: 1px solid #cbd2d9;
+  border: 1px solid var(--border-strong);
   border-radius: 8px;
   margin-bottom: 4px;
-  background: #f8fafc;
+  background: var(--surface-alt);
   transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 
 .settings-field:focus-within {
   border-color: #3e9eff;
-  background: #fff;
+  background: var(--surface);
   box-shadow: 0 0 0 3px rgba(62, 158, 255, 0.15);
 }
 
@@ -95,7 +95,7 @@
   width: 40px;
   text-align: center;
   font-size: 14px;
-  color: #9aa5b1;
+  color: var(--text-muted);
 }
 
 .settings-field input {
@@ -105,7 +105,7 @@
   outline: none;
   padding: 12px 14px 12px 0;
   font-size: 14px;
-  color: #1f2933;
+  color: var(--text);
 }
 
 .settings-field-toggle {
@@ -114,7 +114,7 @@
   border: none;
   background: transparent;
   font-size: 15px;
-  color: #9aa5b1;
+  color: var(--text-muted);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -131,7 +131,7 @@
 .settings-form-hint {
   margin: -12px 0 16px;
   font-size: 13px;
-  color: #9aa5b1;
+  color: var(--text-muted);
 }
 
 .theme-options {
@@ -147,12 +147,12 @@
   align-items: center;
   gap: 6px;
   padding: 14px 10px;
-  border: 1px solid #cbd2d9;
+  border: 1px solid var(--border-strong);
   border-radius: 10px;
-  background: #f8fafc;
+  background: var(--surface-alt);
   font-size: 13px;
   font-weight: 600;
-  color: #616e7c;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease, transform 0.1s ease;
 }
@@ -168,7 +168,7 @@
 .theme-option-selected {
   border-color: #3e9eff;
   background: rgba(62, 158, 255, 0.1);
-  color: #1f2933;
+  color: var(--text);
   box-shadow: 0 0 0 3px rgba(62, 158, 255, 0.12);
 }
 
@@ -179,8 +179,8 @@
 }
 
 .settings-success {
-  background: #e3f9e5;
-  color: #1f7a32;
+  background: var(--success-bg);
+  color: var(--success-text);
   border-radius: 8px;
   padding: 10px 12px;
   font-size: 13px;
@@ -189,8 +189,8 @@
 }
 
 .settings-error {
-  background: #ffe3e3;
-  color: #cf1124;
+  background: var(--danger-soft);
+  color: var(--danger);
   border-radius: 8px;
   padding: 10px 12px;
   font-size: 13px;
@@ -242,11 +242,11 @@
 }
 
 .settings-preview {
-  background: #fff;
+  background: var(--surface);
   border-radius: 14px;
   padding: 28px 22px;
   text-align: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 6px var(--shadow-sm);
 }
 
 .settings-avatar {
@@ -266,13 +266,13 @@
 .settings-preview h3 {
   margin: 0 0 4px;
   font-size: 16px;
-  color: #1f2933;
+  color: var(--text);
 }
 
 .settings-preview-email {
   margin: 0 0 16px;
   font-size: 13px;
-  color: #9aa5b1;
+  color: var(--text-muted);
   word-break: break-word;
 }
 
@@ -282,10 +282,10 @@
   gap: 8px;
   padding: 8px 14px;
   border-radius: 999px;
-  background: #f4f6f8;
+  background: var(--surface-alt);
   font-size: 13px;
   font-weight: 600;
-  color: #3e4c59;
+  color: var(--text-secondary);
 }
 
 .settings-preview-tip {
@@ -305,7 +305,7 @@
 .settings-preview-tip p {
   margin: 0;
   font-size: 13px;
-  color: #616e7c;
+  color: var(--text-secondary);
   line-height: 1.5;
 }
 

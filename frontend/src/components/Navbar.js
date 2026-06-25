@@ -33,6 +33,12 @@ const Navbar = ({ user, onLoggedOut }) => {
           <span className="navbar-link-icon" aria-hidden="true">⚙️</span>
           Settings
         </NavLink>
+        {['admin', 'manager'].includes(user?.userRole) && (
+          <NavLink to="/admin/users" className={({ isActive }) => (isActive ? 'active' : '')}>
+            <span className="navbar-link-icon" aria-hidden="true">🛡️</span>
+            Manage Users
+          </NavLink>
+        )}
       </div>
 
       <div className="navbar-user">

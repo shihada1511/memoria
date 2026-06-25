@@ -1,5 +1,5 @@
 .ai-generator {
-    background: var(--color-surface, #1e1e2e);
+    background: var(--color-base, #181825);
     border: 1px solid var(--color-border, #313244);
     border-radius: 12px;
     padding: 20px 24px;
@@ -95,7 +95,13 @@
 .ai-generator-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .ai-generator-error {
-    color: #f38ba8;
+    color: var(--danger, #f38ba8);
+    font-size: 0.85rem;
+    margin: 8px 0 0;
+}
+
+.ai-generator-success {
+    color: var(--success-text, #a6e3a1);
     font-size: 0.85rem;
     margin: 8px 0 0;
 }
@@ -111,7 +117,7 @@
 .ai-generator-results-title {
     font-size: 0.85rem;
     font-weight: 600;
-    color: #a6e3a1;
+    color: var(--success-text, #a6e3a1);
 }
 
 .ai-generator-cards {
@@ -129,6 +135,26 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
+}
+
+.ai-generator-card-selectable {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.ai-generator-card-checkbox {
+    margin-top: 4px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.ai-generator-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
 }
 
 .ai-generator-card-q,
@@ -152,4 +178,23 @@
 
 .ai-generator-card-label--a {
     background: #a6e3a1;
+}
+
+.ai-generator-add-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-border, #313244);
+}
+
+.ai-generator-deck-select {
+    flex: 1;
+}
+
+.ai-generator-hint {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--color-subtext, #a6adc8);
 }

@@ -201,6 +201,32 @@
   animation: login-spin 0.7s linear infinite;
 }
 
+.login-alt-action {
+  margin: 16px 0 0;
+  text-align: center;
+  font-size: 13px;
+  color: #616e7c;
+}
+
+.login-alt-action a {
+  color: #3e9eff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.login-alt-action a:hover {
+  text-decoration: underline;
+}
+
+.login-success {
+  background: #e3f9e5;
+  color: #1f7a32;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+
 @keyframes login-spin {
   to {
     transform: rotate(360deg);

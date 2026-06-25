@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { login } from '../services/authService';
 import './Login.css';
 
@@ -7,6 +7,8 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const Login = ({ onLoggedIn }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const justRegistered = Boolean(location.state?.justRegistered);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
@@ -74,6 +76,10 @@ const Login = ({ onLoggedIn }) => {
           <h1>Welcome back</h1>
           <p className="login-subtitle">Sign in to keep studying your decks.</p>
 
+          {justRegistered && (
+            <div className="login-success">Account created! Log in to get started.</div>
+          )}
+
           <label htmlFor="email">Email</label>
           <div className={`login-field ${fieldErrors.email ? 'login-field-invalid' : ''}`}>
             <span className="login-field-icon" aria-hidden="true">@</span>
@@ -108,6 +114,10 @@ const Login = ({ onLoggedIn }) => {
             {loading && <span className="login-spinner" aria-hidden="true" />}
             {loading ? 'Signing in...' : 'Login'}
           </button>
+
+          <p className="login-alt-action">
+            New to Memoria? <Link to="/signup">Create account</Link>
+          </p>
         </form>
       </div>
     </div>

@@ -1,32 +1,40 @@
 const bcrypt = require('bcryptjs');
-const { User } = require('../../models');
+const { User, Admin } = require('../../models');
 
 const PUBLIC_ATTRIBUTES = ['id', 'firstName', 'lastName', 'username', 'email', 'role', 'theme', 'createdAt', 'updatedAt'];
 
-const toPublicUser = (user) => ({
-    userId: user.id,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    username: user.username,
-    email: user.email,
-    userRole: user.role,
-    theme: user.theme
+const toPublicAccount = (account, role) => ({
+    userId: account.id,
+    firstName: account.firstName,
+    lastName: account.lastName,
+    username: account.username,
+    email: account.email,
+    userRole: role,
+    theme: account.theme
 });
 
-const getUserIdFromToken = (req) => {
+const toPublicUser = (user) => toPublicAccount(user, user.role);
+const toPublicAdmin = (admin) => toPublicAccount(admin, 'admin');
+
+// Tokens are base64("id:email:role"). Older tokens (pre-admin-login) omit the
+// role segment and always referred to a User, so default to 'user' for those.
+const getAuthFromToken = (req) => {
     const authHeader = req.header('authorization') || '';
     const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
     if (!token) return null;
-    const [userId] = Buffer.from(token, 'base64').toString('utf-8').split(':');
-    const parsed = parseInt(userId);
-    return Number.isNaN(parsed) ? null : parsed;
+
+    const [rawId, , rawRole] = Buffer.from(token, 'base64').toString('utf-8').split(':');
+    const id = parseInt(rawId);
+    if (Number.isNaN(id)) return null;
+
+    return { id, role: rawRole || 'user' };
 };
 
 const getMe = async (req, res) => {
     try {
-        const userId = getUserIdFromToken(req);
+        const auth = getAuthFromToken(req);
 
-        if (!userId) {
+        if (!auth) {
             return res.status(401).json({
                 success: false,
                 data: null,
@@ -34,7 +42,19 @@ const getMe = async (req, res) => {
             });
         }
 
-        const user = await User.findByPk(userId);
+        if (auth.role === 'admin') {
+            const admin = await Admin.findByPk(auth.id);
+            if (!admin) {
+                return res.status(401).json({
+                    success: false,
+                    data: null,
+                    error: { code: "UNAUTHORIZED", message: "Invalid authorization token.", details: {} }
+                });
+            }
+            return res.status(200).json({ success: true, data: toPublicAdmin(admin), error: null });
+        }
+
+        const user = await User.findByPk(auth.id);
 
         if (!user) {
             return res.status(401).json({
@@ -52,9 +72,9 @@ const getMe = async (req, res) => {
 
 const changePassword = async (req, res) => {
     try {
-        const userId = getUserIdFromToken(req);
+        const auth = getAuthFromToken(req);
 
-        if (!userId) {
+        if (!auth) {
             return res.status(401).json({
                 success: false,
                 data: null,
@@ -62,9 +82,11 @@ const changePassword = async (req, res) => {
             });
         }
 
-        const user = await User.findByPk(userId);
+        const account = auth.role === 'admin'
+            ? await Admin.findByPk(auth.id)
+            : await User.findByPk(auth.id);
 
-        if (!user) {
+        if (!account) {
             return res.status(401).json({
                 success: false,
                 data: null,
@@ -82,7 +104,7 @@ const changePassword = async (req, res) => {
             });
         }
 
-        if (!(await bcrypt.compare(currentPassword, user.password))) {
+        if (!(await bcrypt.compare(currentPassword, account.password))) {
             return res.status(401).json({
                 success: false,
                 data: null,
@@ -98,8 +120,8 @@ const changePassword = async (req, res) => {
             });
         }
 
-        user.password = await bcrypt.hash(newPassword, 10);
-        await user.save();
+        account.password = await bcrypt.hash(newPassword, 10);
+        await account.save();
 
         res.status(200).json({ success: true, data: { message: "Password updated successfully." }, error: null });
     } catch (error) {
@@ -110,7 +132,7 @@ const changePassword = async (req, res) => {
 const getAllUsers = async (req, res) => {
     try {
         const users = await User.findAll({ attributes: PUBLIC_ATTRIBUTES });
-        res.status(200).json({ success: true, data: users, error: null });
+        res.status(200).json({ success: true, data: users.map(toPublicUser), error: null });
     } catch (error) {
         res.status(500).json({ success: false, data: null, error: { code: "SERVER_ERROR", message: "An unexpected error occurred.", details: {} } });
     }
@@ -129,7 +151,7 @@ const getUserById = async (req, res) => {
             });
         }
 
-        res.status(200).json({ success: true, data: user, error: null });
+        res.status(200).json({ success: true, data: toPublicUser(user), error: null });
     } catch (error) {
         res.status(500).json({ success: false, data: null, error: { code: "SERVER_ERROR", message: "An unexpected error occurred.", details: {} } });
     }
@@ -137,7 +159,7 @@ const getUserById = async (req, res) => {
 
 const createUser = async (req, res) => {
     try {
-        const { firstName, lastName, username, email, password, userRole } = req.body;
+        const { firstName, lastName, username, email, password } = req.body;
 
         if (!firstName || !lastName || !username || !email || !password) {
             return res.status(400).json({
@@ -168,7 +190,7 @@ const createUser = async (req, res) => {
             username,
             email,
             password: hashedPassword,
-            role: ['user', 'manager'].includes(userRole) ? userRole : 'user'
+            role: 'user'
         });
 
         res.status(201).json({ success: true, data: { userId: newUser.id }, error: null });
@@ -182,8 +204,9 @@ const updateUser = async (req, res) => {
         const id = parseInt(req.params.id);
         const requesterId = parseInt(req.header('x-user-id'));
         const requesterRole = req.header('x-user-role');
+        const isElevated = ['admin', 'manager'].includes(requesterRole);
 
-        if (!['admin', 'manager'].includes(requesterRole) && requesterId !== id) {
+        if (!isElevated && requesterId !== id) {
             return res.status(403).json({
                 success: false,
                 data: null,
@@ -208,6 +231,30 @@ const updateUser = async (req, res) => {
                 success: false,
                 data: null,
                 error: { code: "VALIDATION_ERROR", message: "Missing required fields.", details: {} }
+            });
+        }
+
+        if (!['user', 'manager'].includes(userRole)) {
+            return res.status(400).json({
+                success: false,
+                data: null,
+                error: { code: "VALIDATION_ERROR", message: "userRole must be 'user' or 'manager'.", details: {} }
+            });
+        }
+
+        if (!isElevated && userRole !== user.role) {
+            return res.status(403).json({
+                success: false,
+                data: null,
+                error: { code: "FORBIDDEN", message: "You cannot change your own role.", details: {} }
+            });
+        }
+
+        if (requesterRole === 'manager' && user.role !== 'user' && requesterId !== id) {
+            return res.status(403).json({
+                success: false,
+                data: null,
+                error: { code: "FORBIDDEN", message: "Managers can only manage regular user accounts.", details: {} }
             });
         }
 
@@ -239,6 +286,14 @@ const deleteUser = async (req, res) => {
                 success: false,
                 data: null,
                 error: { code: "NOT_FOUND", message: `User with ID ${id} not found.`, details: {} }
+            });
+        }
+
+        if (requesterRole === 'manager' && user.role !== 'user' && requesterId !== id) {
+            return res.status(403).json({
+                success: false,
+                data: null,
+                error: { code: "FORBIDDEN", message: "Managers can only manage regular user accounts.", details: {} }
             });
         }
 
