@@ -8,3 +8,8 @@ export const getStats = async () => {
   const response = await api.get('/stats');
   return response.data.data;
 };
+
+export const getDashboardStats = async () => {
+  const response = await api.get('/stats/dashboard');
+  return response.data.data;
+};

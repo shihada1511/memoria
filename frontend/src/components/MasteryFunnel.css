@@ -1,0 +1,122 @@
+.mf {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    height: 100%;
+}
+
+.mf-title {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text);
+}
+
+.mf-subtitle {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.mf-empty {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.mf-loading {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    padding: 12px 0;
+}
+
+/* ── Stages ── */
+.mf-stages {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+}
+
+.mf-stage {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.mf-stage-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mf-icon { font-size: 1rem; flex-shrink: 0; }
+
+.mf-stage-labels {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.mf-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.2;
+}
+
+.mf-desc {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.mf-nums {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    flex-shrink: 0;
+}
+
+.mf-count {
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.mf-pct {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+}
+
+/* ── Progress bar ── */
+.mf-track {
+    height: 7px;
+    background: var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.mf-bar {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.5s ease;
+}
+
+/* ── Mastered badge ── */
+.mf-badge {
+    margin-top: auto;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    border-radius: 9px;
+    padding: 8px 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #10b981;
+    text-align: center;
+}

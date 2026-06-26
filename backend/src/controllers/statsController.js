@@ -1,4 +1,4 @@
-const { StudyLog, Deck } = require('../../models');
+const { StudyLog, Deck, Card, CardProgress } = require('../../models');
 
 const todayStr = () => new Date().toISOString().slice(0, 10);
 
@@ -47,6 +47,27 @@ const logStudy = async (req, res) => {
             correct: !!correct,
             studiedAt: todayStr()
         });
+
+        // Update SRS card progress
+        if (cardId) {
+            const today = todayStr();
+            const [progress] = await CardProgress.findOrCreate({
+                where: { userId, cardId },
+                defaults: { userId, cardId, correctCount: 0, incorrectCount: 0, interval: 1, nextReviewAt: today, lastStudiedAt: today }
+            });
+
+            const newInterval = correct ? Math.min((progress.interval || 1) * 2, 60) : 1;
+            const next = new Date(today + 'T00:00:00');
+            next.setDate(next.getDate() + newInterval);
+
+            await progress.update({
+                correctCount:   progress.correctCount   + (correct ? 1 : 0),
+                incorrectCount: progress.incorrectCount + (correct ? 0 : 1),
+                interval:       newInterval,
+                nextReviewAt:   next.toISOString().slice(0, 10),
+                lastStudiedAt:  today
+            });
+        }
 
         res.status(201).json({ success: true, data: null, error: null });
     } catch (error) {
@@ -127,4 +148,65 @@ const getStats = async (req, res) => {
     }
 };
 
-module.exports = { logStudy, getStats };
+const getDashboardStats = async (req, res) => {
+    try {
+        const userId = parseInt(req.header('x-user-id'));
+        const today = todayStr();
+
+        const decks = await Deck.findAll({
+            where: { userId },
+            include: [{ model: Card, as: 'cards', attributes: ['id'] }]
+        });
+        const allCardIds = decks.flatMap(d => d.cards.map(c => c.id));
+        const totalCards = allCardIds.length;
+
+        const progress = await CardProgress.findAll({ where: { userId } });
+        const progressMap = {};
+        progress.forEach(p => { progressMap[String(p.cardId)] = p; });
+
+        let dueToday = 0;
+        const mastery = { new: 0, learning: 0, familiar: 0, mastered: 0 };
+
+        allCardIds.forEach(cardId => {
+            const p = progressMap[String(cardId)];
+            if (!p) {
+                mastery.new++;
+                dueToday++;
+            } else {
+                if (p.nextReviewAt <= today) dueToday++;
+                if (p.correctCount < 3)      mastery.learning++;
+                else if (p.correctCount < 8) mastery.familiar++;
+                else                         mastery.mastered++;
+            }
+        });
+
+        // Forecast: how many cards have nextReviewAt on each of the next 30 days
+        const forecastMap = {};
+        for (let i = 0; i <= 30; i++) {
+            const d = new Date(today + 'T00:00:00');
+            d.setDate(d.getDate() + i);
+            forecastMap[d.toISOString().slice(0, 10)] = 0;
+        }
+        forecastMap[today] = dueToday;
+
+        progress.forEach(p => {
+            if (p.nextReviewAt > today && Object.prototype.hasOwnProperty.call(forecastMap, p.nextReviewAt)) {
+                forecastMap[p.nextReviewAt]++;
+            }
+        });
+
+        const forecast = Object.entries(forecastMap)
+            .map(([date, count]) => ({ date, count }))
+            .sort((a, b) => a.date.localeCompare(b.date));
+
+        res.status(200).json({
+            success: true,
+            data: { dueToday, totalCards, forecast, mastery: { ...mastery, total: totalCards } },
+            error: null
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, data: null, error: { code: 'SERVER_ERROR', message: 'An unexpected error occurred.', details: {} } });
+    }
+};
+
+module.exports = { logStudy, getStats, getDashboardStats };
