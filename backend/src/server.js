@@ -29,7 +29,7 @@ const socketHandler = require('./socket/socketHandler');
 const { sequelize } = require('../models');
 
 app.use(cors({ origin: FRONTEND_URL }));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use(logger);
 
 app.get('/', (req, res) => {

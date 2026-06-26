@@ -6,24 +6,45 @@ const getClient = () => {
     return new OpenAI({ apiKey: key, baseURL: 'https://api.groq.com/openai/v1' });
 };
 
+// Vision models sometimes wrap JSON in markdown — try direct parse then regex extraction
+const extractCards = (raw) => {
+    try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed.cards)) return parsed.cards;
+    } catch (_) {}
+
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (match) {
+        try {
+            const parsed = JSON.parse(match[0]);
+            if (Array.isArray(parsed.cards)) return parsed.cards;
+        } catch (_) {}
+    }
+    return null;
+};
+
 /**
  * POST /api/ai/generate-cards
- * Body: { topic: string, count?: number }
+ * Body: { topic?: string, count?: number, imageBase64?: string }
  *
- * Generates flashcard Q&A pairs for the given topic using the AI provider.
+ * Either topic or imageBase64 must be provided.
+ * When imageBase64 is present, uses Groq's vision model (llama-3.2-11b-vision-preview).
  */
 const generateCards = async (req, res) => {
     try {
-        const { topic, count = 5 } = req.body;
+        const { topic, count = 5, imageBase64 } = req.body;
 
-        if (!topic || typeof topic !== 'string' || topic.trim().length === 0) {
+        const hasTopic = topic && typeof topic === 'string' && topic.trim().length > 0;
+        const hasImage = imageBase64 && typeof imageBase64 === 'string' && imageBase64.startsWith('data:image/');
+
+        if (!hasTopic && !hasImage) {
             return res.status(400).json({
                 success: false,
                 data: null,
                 error: {
                     code: 'VALIDATION_ERROR',
-                    message: 'A non-empty "topic" string is required.',
-                    details: { required: ['topic'] }
+                    message: 'Provide a topic, an image, or both.',
+                    details: { required: ['topic or imageBase64'] }
                 }
             });
         }
@@ -43,7 +64,36 @@ const generateCards = async (req, res) => {
 
         const cardCount = Math.min(Math.max(parseInt(count) || 5, 1), 20);
 
-        const prompt = `You are a flashcard generator for a study app called Memoria.
+        let model, messages, completionOptions;
+
+        if (hasImage) {
+            model = 'llama-3.2-11b-vision-preview';
+
+            const textPrompt = `Analyze this image and generate exactly ${cardCount} flashcard question-answer pairs about the content you see.
+${hasTopic ? `Focus especially on: "${topic.trim()}".` : 'Cover the main academic or technical concepts visible in the image.'}
+
+Rules:
+- Questions should be clear, specific, and testable
+- Answers should be concise but complete (1-3 sentences)
+- Base every question on actual content from the image — do not invent details
+
+Respond ONLY with a valid JSON object, no markdown, no extra text:
+{"cards": [{"question": "...", "answer": "..."}, ...]}`;
+
+            messages = [{
+                role: 'user',
+                content: [
+                    { type: 'image_url', image_url: { url: imageBase64 } },
+                    { type: 'text', text: textPrompt }
+                ]
+            }];
+
+            // Vision models don't support response_format JSON mode on Groq
+            completionOptions = { model, messages, temperature: 0.7, max_tokens: 2000 };
+        } else {
+            model = 'llama-3.3-70b-versatile';
+
+            const prompt = `You are a flashcard generator for a study app called Memoria.
 Generate exactly ${cardCount} flashcard question-answer pairs about: "${topic.trim()}".
 
 Rules:
@@ -60,30 +110,22 @@ Respond ONLY with a valid JSON object of this exact form, no markdown, no extra 
   ]
 }`;
 
-        const completion = await client.chat.completions.create({
-            model: 'llama-3.3-70b-versatile',
-            messages: [{ role: 'user', content: prompt }],
-            temperature: 0.7,
-            max_tokens: 2000,
-            response_format: { type: 'json_object' }
-        });
+            messages = [{ role: 'user', content: prompt }];
+            completionOptions = {
+                model, messages, temperature: 0.7, max_tokens: 2000,
+                response_format: { type: 'json_object' }
+            };
+        }
 
+        const completion = await client.chat.completions.create(completionOptions);
         const raw = completion.choices[0]?.message?.content?.trim() || '';
 
-        let cards;
-        try {
-            const parsed = JSON.parse(raw);
-            cards = parsed.cards;
-            if (!Array.isArray(cards)) throw new Error('Expected cards array');
-        } catch {
+        const cards = extractCards(raw);
+        if (!cards) {
             return res.status(500).json({
                 success: false,
                 data: null,
-                error: {
-                    code: 'AI_PARSE_ERROR',
-                    message: 'AI returned an unexpected format.',
-                    details: { raw }
-                }
+                error: { code: 'AI_PARSE_ERROR', message: 'AI returned an unexpected format.', details: { raw } }
             });
         }
 
@@ -94,7 +136,7 @@ Respond ONLY with a valid JSON object of this exact form, no markdown, no extra 
         res.status(200).json({
             success: true,
             data: {
-                topic: topic.trim(),
+                topic: hasTopic ? topic.trim() : 'Image Analysis',
                 cards: validated
             },
             error: null

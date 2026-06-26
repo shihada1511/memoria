@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import api from '../services/api';
 import { createCard } from '../services/dashboardService';
 import './AIGenerator.css';
 
 /**
- * AIGenerator – lets the user describe a topic, calls POST /api/ai/generate-cards,
- * shows a preview of the generated flashcards, and lets them save selected
- * cards into one of their decks.
+ * AIGenerator – lets the user describe a topic and/or upload an image,
+ * calls POST /api/ai/generate-cards, shows a preview of generated flashcards,
+ * and lets them save selected cards into one of their decks.
  *
  * Props:
  *   decks         array of { id|deckId, title }
@@ -19,24 +19,56 @@ const AIGenerator = ({ decks = [], onCardsAdded }) => {
     const [error, setError] = useState('');
     const [generatedCards, setGeneratedCards] = useState(null);
 
+    const [imageBase64, setImageBase64] = useState('');
+    const [imagePreview, setImagePreview] = useState('');
+    const [uploadError, setUploadError] = useState('');
+    const [isDragOver, setIsDragOver] = useState(false);
+    const fileInputRef = useRef(null);
+
     const [selectedDeckId, setSelectedDeckId] = useState('');
     const [selectedCards, setSelectedCards] = useState(new Set());
     const [adding, setAdding] = useState(false);
     const [addError, setAddError] = useState('');
     const [addSuccess, setAddSuccess] = useState('');
 
+    const handleImageFile = (file) => {
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+            setUploadError('Please select an image file (JPEG, PNG, WebP).');
+            return;
+        }
+        if (file.size > 4 * 1024 * 1024) {
+            setUploadError('Image must be smaller than 4 MB.');
+            return;
+        }
+        setUploadError('');
+        const reader = new FileReader();
+        reader.onload = (e) => { setImageBase64(e.target.result); setImagePreview(e.target.result); };
+        reader.readAsDataURL(file);
+    };
+
+    const clearImage = () => {
+        setImageBase64(''); setImagePreview(''); setUploadError('');
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
     const handleGenerate = async (e) => {
         e.preventDefault();
-        if (!topic.trim()) return;
+        if (!topic.trim() && !imageBase64) return;
 
         setLoading(true);
         setError('');
+        setUploadError('');
         setAddError('');
         setAddSuccess('');
         setGeneratedCards(null);
 
         try {
-            const res = await api.post('/ai/generate-cards', { topic: topic.trim(), count });
+            const payload = { count };
+            if (topic.trim()) payload.topic = topic.trim();
+            if (imageBase64)  payload.imageBase64 = imageBase64;
+
+            const res = await api.post('/ai/generate-cards', payload);
             setGeneratedCards(res.data.data);
             setSelectedCards(new Set(res.data.data.cards.map((_, i) => i)));
             setSelectedDeckId(String(decks[0]?.id ?? decks[0]?.deckId ?? ''));
@@ -87,7 +119,7 @@ const AIGenerator = ({ decks = [], onCardsAdded }) => {
                 <span className="ai-generator-icon">🤖</span>
                 <div>
                     <h3 className="ai-generator-title">AI Card Generator</h3>
-                    <p className="ai-generator-subtitle">Describe a topic and let AI create flashcards for you.</p>
+                    <p className="ai-generator-subtitle">Type a topic or upload an image — AI builds the cards.</p>
                 </div>
             </div>
 
@@ -95,11 +127,51 @@ const AIGenerator = ({ decks = [], onCardsAdded }) => {
                 <input
                     className="ai-generator-input"
                     type="text"
-                    placeholder="e.g. React Hooks, Eurocode 3, Geomechanics…"
+                    placeholder={imageBase64 ? 'Optional: describe focus area…' : 'e.g. React Hooks, Eurocode 3, Geomechanics…'}
                     value={topic}
                     onChange={(e) => setTopic(e.target.value)}
                     disabled={loading}
                 />
+
+                <div className="ai-divider">or upload an image</div>
+
+                {/* Hidden file input */}
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    style={{ display: 'none' }}
+                    onChange={(e) => handleImageFile(e.target.files[0])}
+                />
+
+                {/* Upload / preview area */}
+                <div
+                    className={`ai-upload-area${isDragOver ? ' ai-upload-area--over' : ''}${imagePreview ? ' ai-upload-area--filled' : ''}`}
+                    onClick={() => !imagePreview && fileInputRef.current?.click()}
+                    onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+                    onDragLeave={() => setIsDragOver(false)}
+                    onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleImageFile(e.dataTransfer.files[0]); }}
+                >
+                    {imagePreview ? (
+                        <div className="ai-preview">
+                            <img src={imagePreview} alt="Upload preview" className="ai-preview-img" />
+                            <button
+                                type="button"
+                                className="ai-preview-clear"
+                                onClick={(e) => { e.stopPropagation(); clearImage(); }}
+                                title="Remove image"
+                            >✕</button>
+                        </div>
+                    ) : (
+                        <div className="ai-upload-placeholder">
+                            <span className="ai-upload-icon">📷</span>
+                            <span className="ai-upload-text">Click to upload or drag & drop</span>
+                            <span className="ai-upload-hint">JPEG · PNG · WebP · max 4 MB</span>
+                        </div>
+                    )}
+                </div>
+                {uploadError && <p className="ai-upload-error">{uploadError}</p>}
+
                 <div className="ai-generator-row">
                     <label className="ai-generator-label">
                         Cards:
@@ -114,7 +186,7 @@ const AIGenerator = ({ decks = [], onCardsAdded }) => {
                             ))}
                         </select>
                     </label>
-                    <button className="ai-generator-btn" type="submit" disabled={loading || !topic.trim()}>
+                    <button className="ai-generator-btn" type="submit" disabled={loading || (!topic.trim() && !imageBase64)}>
                         {loading ? 'Generating…' : 'Generate ✨'}
                     </button>
                 </div>

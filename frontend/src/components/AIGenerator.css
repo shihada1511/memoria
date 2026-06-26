@@ -198,3 +198,94 @@
     font-size: 0.82rem;
     color: var(--color-subtext, #a6adc8);
 }
+
+/* ── Image upload ── */
+.ai-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.7rem;
+    color: var(--color-overlay, #585b70);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+.ai-divider::before,
+.ai-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--color-border, #313244);
+}
+
+.ai-upload-area {
+    border: 2px dashed var(--color-border, #313244);
+    border-radius: 10px;
+    padding: 14px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 72px;
+}
+.ai-upload-area:hover,
+.ai-upload-area--over {
+    border-color: #a6e3a1;
+    background: rgba(166, 227, 161, 0.06);
+}
+.ai-upload-area--filled {
+    cursor: default;
+    border-style: solid;
+    border-color: var(--color-border, #313244);
+}
+
+.ai-upload-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    text-align: center;
+    pointer-events: none;
+}
+.ai-upload-icon { font-size: 1.4rem; line-height: 1; }
+.ai-upload-text { font-size: 0.82rem; color: var(--color-subtext, #a6adc8); }
+.ai-upload-hint { font-size: 0.7rem; color: var(--color-overlay, #585b70); }
+
+.ai-preview {
+    position: relative;
+    display: inline-flex;
+}
+.ai-preview-img {
+    max-height: 110px;
+    max-width: 100%;
+    border-radius: 8px;
+    object-fit: contain;
+    display: block;
+}
+.ai-preview-clear {
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    background: #f38ba8;
+    color: #1e1e2e;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+    transition: background 0.12s;
+}
+.ai-preview-clear:hover { background: #eb4d5b; }
+
+.ai-upload-error {
+    font-size: 0.82rem;
+    color: var(--danger, #f38ba8);
+    margin: 2px 0 0;
+}
