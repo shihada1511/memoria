@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { connectSocket } from '../services/socketService';
 import { getCardsByDeck, evaluateAnswer } from '../services/dashboardService';
+import { logStudy } from '../services/statsService';
 import './StudySession.css';
 
 const StudySession = ({ deck, username, onActiveChange }) => {
@@ -171,6 +172,7 @@ const StudySession = ({ deck, username, onActiveChange }) => {
 
     const handleRate = (gotIt) => {
         const card = studyQueue[currentIndex];
+        logStudy(deck.id, card.id, gotIt).catch(() => {});
         const updatedMissed = gotIt ? missedQueue : [...missedQueue, card];
         const nextIndex = currentIndex + 1;
         resetCardState();

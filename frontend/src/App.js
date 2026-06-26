@@ -6,6 +6,7 @@ import SignUp from './pages/SignUp';
 import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
 import ManageUsers from './pages/ManageUsers';
+import Stats from './pages/Stats';
 import { getCurrentUser, isAuthenticated } from './services/authService';
 
 const App = () => {
@@ -66,6 +67,7 @@ const App = () => {
         element={user ? <Layout user={user} onLoggedOut={() => setUser(null)} /> : <Navigate to="/login" replace />}
       >
         <Route path="/dashboard" element={<Dashboard user={user} />} />
+        <Route path="/stats" element={<Stats />} />
         <Route path="/settings" element={<Settings onUserUpdated={(updated) => setUser((prev) => ({ ...prev, ...updated }))} />} />
         <Route
           path="/admin/users"

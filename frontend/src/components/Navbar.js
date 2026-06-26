@@ -29,6 +29,10 @@ const Navbar = ({ user, onLoggedOut }) => {
           <span className="navbar-link-icon" aria-hidden="true">🗂️</span>
           Dashboard
         </NavLink>
+        <NavLink to="/stats" className={({ isActive }) => (isActive ? 'active' : '')}>
+          <span className="navbar-link-icon" aria-hidden="true">📊</span>
+          Statistics
+        </NavLink>
         <NavLink to="/settings" className={({ isActive }) => (isActive ? 'active' : '')}>
           <span className="navbar-link-icon" aria-hidden="true">⚙️</span>
           Settings

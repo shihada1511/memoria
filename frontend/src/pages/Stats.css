@@ -1,0 +1,131 @@
+.stats-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.stats-heading {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+}
+
+/* ── Summary cards ── */
+.stats-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.stats-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 4px;
+}
+
+.stats-card-icon {
+    font-size: 1.6rem;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.stats-card-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+}
+
+.stats-card-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stats-card-sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* ── Sections ── */
+.stats-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.stats-section-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stats-empty {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    font-style: italic;
+    margin: 0;
+}
+
+/* ── Tooltip ── */
+.stats-tooltip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    font-size: 0.82rem;
+}
+
+.stats-tooltip-date {
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+}
+
+.stats-tooltip-rate {
+    color: #6b46c1;
+    font-weight: 600;
+}
+
+.stats-tooltip-total {
+    color: var(--text-muted);
+}
+
+/* ── States ── */
+.stats-loading,
+.stats-error {
+    padding: 48px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.stats-error { color: #cf1124; }
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+    .stats-summary {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
