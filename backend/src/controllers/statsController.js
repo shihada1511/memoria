@@ -1,4 +1,4 @@
-const { StudyLog } = require('../../models');
+const { StudyLog, Deck } = require('../../models');
 
 const todayStr = () => new Date().toISOString().slice(0, 10);
 
@@ -60,7 +60,8 @@ const getStats = async (req, res) => {
 
         const logs = await StudyLog.findAll({
             where: { userId },
-            attributes: ['studiedAt', 'correct'],
+            attributes: ['studiedAt', 'correct', 'deckId'],
+            include: [{ model: Deck, as: 'deck', attributes: ['id', 'title', 'subject'], required: false }],
             order: [['studiedAt', 'ASC']]
         });
 
@@ -70,10 +71,11 @@ const getStats = async (req, res) => {
 
         const heatmapMap = {};
         const retentionMap = {};
+        const deckMap = {};
         let totalCards = 0;
         let totalCorrect = 0;
 
-        logs.forEach(({ studiedAt, correct }) => {
+        logs.forEach(({ studiedAt, correct, deckId, deck }) => {
             const date = studiedAt;
             totalCards++;
             if (correct) totalCorrect++;
@@ -85,6 +87,12 @@ const getStats = async (req, res) => {
             if (!retentionMap[date]) retentionMap[date] = { correct: 0, total: 0 };
             retentionMap[date].total++;
             if (correct) retentionMap[date].correct++;
+
+            if (deckId) {
+                if (!deckMap[deckId]) deckMap[deckId] = { deckId, title: deck?.title || 'Deleted Deck', subject: deck?.subject || '', correct: 0, total: 0 };
+                deckMap[deckId].total++;
+                if (correct) deckMap[deckId].correct++;
+            }
         });
 
         const heatmap = Object.entries(heatmapMap)
@@ -105,9 +113,13 @@ const getStats = async (req, res) => {
 
         const overallRate = totalCards ? Math.round(totalCorrect / totalCards * 100) : 0;
 
+        const deckStats = Object.values(deckMap)
+            .map(d => ({ ...d, rate: d.total ? Math.round(d.correct / d.total * 100) : 0 }))
+            .sort((a, b) => b.total - a.total);
+
         res.status(200).json({
             success: true,
-            data: { heatmap, retention, streak, longestStreak, totalCards, totalCorrect, overallRate },
+            data: { heatmap, retention, streak, longestStreak, totalCards, totalCorrect, overallRate, deckStats },
             error: null
         });
     } catch (error) {

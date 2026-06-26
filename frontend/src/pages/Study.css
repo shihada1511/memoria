@@ -1,0 +1,164 @@
+.study-page {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 32px 24px 56px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.study-heading {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text);
+    margin: 0;
+}
+
+/* ── Stat cards ── */
+.study-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+}
+
+.study-stat-card {
+    border-radius: 14px;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 4px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.study-stat-card--purple { border-top: 4px solid #6b46c1; }
+.study-stat-card--blue   { border-top: 4px solid #2b6cb0; }
+.study-stat-card--green  { border-top: 4px solid #10b981; }
+.study-stat-card--amber  { border-top: 4px solid #f59e0b; }
+
+.study-stat-icon  { font-size: 1.5rem; margin-bottom: 4px; }
+.study-stat-value { font-size: 1.9rem; font-weight: 800; color: var(--text); line-height: 1; }
+.study-stat-label { font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+.study-stat-sub   { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+
+/* ── Sections ── */
+.study-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.study-section-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+.study-empty {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    font-style: italic;
+    margin: 0;
+}
+
+/* ── Chart tooltip ── */
+.study-tooltip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    font-size: 0.82rem;
+}
+.study-tooltip-date  { font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.study-tooltip-rate  { color: #6b46c1; font-weight: 600; }
+.study-tooltip-cards { color: var(--text-muted); margin-top: 2px; }
+
+/* ── Deck performance table ── */
+.study-deck-table {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.study-deck-table-hdr,
+.study-deck-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 110px 80px 120px;
+    gap: 12px;
+    padding: 11px 16px;
+    align-items: center;
+}
+
+.study-deck-table-hdr {
+    background: var(--surface-alt);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+}
+
+.study-deck-row {
+    border-bottom: 1px solid var(--border);
+    font-size: 0.88rem;
+    color: var(--text);
+    transition: background 0.1s;
+}
+.study-deck-row:last-child { border-bottom: none; }
+.study-deck-row:hover { background: var(--surface-alt); }
+
+.study-deck-name    { font-weight: 600; }
+.study-deck-subject { color: var(--text-muted); font-size: 0.82rem; }
+.study-deck-total   { color: var(--text-secondary); }
+
+.study-deck-rate { font-weight: 700; }
+.study-deck-rate--good { color: #10b981; }
+.study-deck-rate--mid  { color: #f59e0b; }
+.study-deck-rate--low  { color: #ef4444; }
+
+.study-deck-bar-wrap {
+    height: 6px;
+    background: var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+}
+.study-deck-bar {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.4s ease;
+}
+
+/* ── States ── */
+.study-loading,
+.study-error {
+    padding: 60px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+.study-error { color: #ef4444; }
+
+/* ── Responsive ── */
+@media (max-width: 700px) {
+    .study-stat-grid { grid-template-columns: repeat(2, 1fr); }
+    .study-deck-table-hdr,
+    .study-deck-row { grid-template-columns: 2fr 80px 80px; }
+    .study-deck-table-hdr span:nth-child(2),
+    .study-deck-row .study-deck-subject,
+    .study-deck-table-hdr span:last-child,
+    .study-deck-row .study-deck-bar-wrap { display: none; }
+}
