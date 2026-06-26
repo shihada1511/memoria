@@ -1,19 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { connectSocket, getSocket } from '../services/socketService';
-import { getCardsByDeck } from '../services/dashboardService';
+import ReactMarkdown from 'react-markdown';
+import { connectSocket } from '../services/socketService';
+import { getCardsByDeck, evaluateAnswer } from '../services/dashboardService';
 import './StudySession.css';
 
-/**
- * StudySession – real-time study room for a deck.
- *
- * Cards are studied in rounds: any card rated "Still learning" gets queued
- * for another pass once the current round ends, repeating until every card
- * in the deck has been rated "Got it" at least once.
- *
- * Props:
- *   deck     { id, title }
- *   username string
- */
 const StudySession = ({ deck, username, onActiveChange }) => {
     const [joined, setJoined] = useState(false);
     const [participants, setParticipants] = useState([]);
@@ -25,7 +15,13 @@ const StudySession = ({ deck, username, onActiveChange }) => {
     const [sessionDone, setSessionDone] = useState(false);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [flipped, setFlipped] = useState(false);
+
+    const [userAnswer, setUserAnswer] = useState('');
+    const [gradeResult, setGradeResult] = useState(null);
+    const [grading, setGrading] = useState(false);
+
     const socketRef = useRef(null);
+    const textareaRef = useRef(null);
 
     useEffect(() => {
         socketRef.current = connectSocket();
@@ -59,7 +55,7 @@ const StudySession = ({ deck, username, onActiveChange }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Keyboard shortcuts: Space/Enter flips, ArrowRight rates "Got it", ArrowLeft rates "Still learning".
+    // Keyboard shortcuts: Space/Enter → check answer; Arrow keys → rate when flipped.
     useEffect(() => {
         if (!joined || sessionDone || studyQueue.length === 0) return;
 
@@ -67,13 +63,13 @@ const StudySession = ({ deck, username, onActiveChange }) => {
             const tag = document.activeElement?.tagName;
             if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
 
-            if (e.key === ' ' || e.key === 'Enter') {
+            if (!flipped && (e.key === ' ' || e.key === 'Enter')) {
                 e.preventDefault();
-                handleFlip();
-            } else if (flipped && e.key === 'ArrowRight') {
+                handleCheckAnswer();
+            } else if (flipped && !grading && e.key === 'ArrowRight') {
                 e.preventDefault();
                 handleRate(true);
-            } else if (flipped && e.key === 'ArrowLeft') {
+            } else if (flipped && !grading && e.key === 'ArrowLeft') {
                 e.preventDefault();
                 handleRate(false);
             }
@@ -82,10 +78,17 @@ const StudySession = ({ deck, username, onActiveChange }) => {
         document.addEventListener('keydown', handleKeyDown);
         return () => document.removeEventListener('keydown', handleKeyDown);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [joined, sessionDone, studyQueue, currentIndex, flipped, missedQueue, round]);
+    }, [joined, sessionDone, studyQueue, currentIndex, flipped, grading, userAnswer, missedQueue, round]);
 
     const addEvent = (text) =>
         setEvents((prev) => [{ text, time: new Date().toLocaleTimeString() }, ...prev].slice(0, 20));
+
+    const resetCardState = () => {
+        setFlipped(false);
+        setUserAnswer('');
+        setGradeResult(null);
+        setGrading(false);
+    };
 
     const joinSession = async () => {
         let deckCards = [];
@@ -100,15 +103,11 @@ const StudySession = ({ deck, username, onActiveChange }) => {
         setMissedQueue([]);
         setRound(1);
         setSessionDone(false);
+        resetCardState();
 
-        socketRef.current.emit('join-session', {
-            deckId: deck.id,
-            deckTitle: deck.title,
-            username
-        });
+        socketRef.current.emit('join-session', { deckId: deck.id, deckTitle: deck.title, username });
         setJoined(true);
         setCurrentIndex(0);
-        setFlipped(false);
         addEvent('You joined the session');
         onActiveChange?.(true);
     };
@@ -117,6 +116,7 @@ const StudySession = ({ deck, username, onActiveChange }) => {
         socketRef.current.emit('leave-session', { deckId: deck.id });
         setJoined(false);
         setParticipants([]);
+        resetCardState();
         addEvent('You left the session');
         onActiveChange?.(false);
     };
@@ -127,20 +127,45 @@ const StudySession = ({ deck, username, onActiveChange }) => {
         setRound(1);
         setSessionDone(false);
         setCurrentIndex(0);
-        setFlipped(false);
+        resetCardState();
         addEvent('Restarted the deck from round 1');
     };
 
     const handleFlip = () => {
-        const next = !flipped;
-        setFlipped(next);
-        if (next) {
-            socketRef.current.emit('card-flipped', {
-                deckId: deck.id,
-                cardIndex: currentIndex,
-                totalCards: studyQueue.length,
-                username
-            });
+        if (flipped) return;
+        setFlipped(true);
+        socketRef.current.emit('card-flipped', {
+            deckId: deck.id,
+            cardIndex: currentIndex,
+            totalCards: studyQueue.length,
+            username
+        });
+    };
+
+    const handleCheckAnswer = async () => {
+        const trimmed = userAnswer.trim();
+
+        if (!trimmed) {
+            handleFlip();
+            return;
+        }
+
+        setGrading(true);
+        setFlipped(true);
+        socketRef.current.emit('card-flipped', {
+            deckId: deck.id,
+            cardIndex: currentIndex,
+            totalCards: studyQueue.length,
+            username
+        });
+
+        try {
+            const result = await evaluateAnswer(trimmed, studyQueue[currentIndex].answer);
+            setGradeResult(result);
+        } catch {
+            setGradeResult(null);
+        } finally {
+            setGrading(false);
         }
     };
 
@@ -148,7 +173,7 @@ const StudySession = ({ deck, username, onActiveChange }) => {
         const card = studyQueue[currentIndex];
         const updatedMissed = gotIt ? missedQueue : [...missedQueue, card];
         const nextIndex = currentIndex + 1;
-        setFlipped(false);
+        resetCardState();
 
         if (nextIndex >= studyQueue.length) {
             if (updatedMissed.length > 0) {
@@ -195,37 +220,73 @@ const StudySession = ({ deck, username, onActiveChange }) => {
                                 Card {currentIndex + 1} of {studyQueue.length}
                                 {round > 1 && <span className="study-session-round-badge">Round {round}</span>}
                             </div>
+
                             <div
                                 className={`study-flashcard ${flipped ? 'study-flashcard-flipped' : ''}`}
-                                onClick={handleFlip}
+                                onClick={!flipped ? handleFlip : undefined}
                             >
                                 <div className="study-flashcard-inner">
                                     <div className="study-flashcard-face study-flashcard-front">
                                         <span className="study-flashcard-label">Q</span>
-                                        <p>{studyQueue[currentIndex].question}</p>
+                                        <div className="study-flashcard-content">
+                                            <ReactMarkdown>{studyQueue[currentIndex].question}</ReactMarkdown>
+                                        </div>
                                     </div>
                                     <div className="study-flashcard-face study-flashcard-back">
                                         <span className="study-flashcard-label study-flashcard-label--a">A</span>
-                                        <p>{studyQueue[currentIndex].answer}</p>
+                                        <div className="study-flashcard-content">
+                                            <ReactMarkdown>{studyQueue[currentIndex].answer}</ReactMarkdown>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div className="study-session-controls">
-                                {!flipped ? (
-                                    <button className="study-btn study-btn-flip" onClick={handleFlip}>
-                                        Show Answer <span className="study-session-key-hint">space</span>
+
+                            {!flipped ? (
+                                <div className="study-answer-area">
+                                    <textarea
+                                        ref={textareaRef}
+                                        className="study-answer-input"
+                                        placeholder="Type your answer here, then click Check — or leave blank to just flip the card"
+                                        value={userAnswer}
+                                        onChange={(e) => setUserAnswer(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                e.preventDefault();
+                                                handleCheckAnswer();
+                                            }
+                                        }}
+                                        rows={2}
+                                    />
+                                    <button
+                                        className="study-btn study-btn-flip"
+                                        onClick={handleCheckAnswer}
+                                    >
+                                        {userAnswer.trim() ? 'Check Answer' : 'Show Answer'}
+                                        {!userAnswer.trim() && <span className="study-session-key-hint">space</span>}
                                     </button>
-                                ) : (
-                                    <>
+                                </div>
+                            ) : (
+                                <div className="study-session-controls-flipped">
+                                    {grading && (
+                                        <div className="study-grading">
+                                            <span className="study-grading-spinner" /> AI is evaluating your answer…
+                                        </div>
+                                    )}
+                                    {gradeResult && !grading && (
+                                        <div className={`study-grade-result study-grade-result--${gradeResult.correct ? 'correct' : 'incorrect'}`}>
+                                            {gradeResult.correct ? '✅ Correct' : '❌ Incorrect'} — {gradeResult.feedback}
+                                        </div>
+                                    )}
+                                    <div className="study-session-controls">
                                         <button className="study-btn study-btn-miss" onClick={() => handleRate(false)}>
                                             ❌ Still learning <span className="study-session-key-hint">←</span>
                                         </button>
                                         <button className="study-btn study-btn-next" onClick={() => handleRate(true)}>
                                             ✅ Got it <span className="study-session-key-hint">→</span>
                                         </button>
-                                    </>
-                                )}
-                            </div>
+                                    </div>
+                                </div>
+                            )}
                         </>
                     )}
 

@@ -29,3 +29,8 @@ export const deleteCard = async (deckId, cardId) => {
   const response = await api.delete(`/decks/${deckId}/cards/${cardId}`);
   return response.data.data;
 };
+
+export const evaluateAnswer = async (userAnswer, correctAnswer) => {
+  const response = await api.post('/ai/evaluate-answer', { userAnswer, correctAnswer });
+  return response.data.data;
+};

@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const { User, Admin } = require('../../models');
 
 const PUBLIC_ATTRIBUTES = ['id', 'firstName', 'lastName', 'username', 'email', 'role', 'theme', 'createdAt', 'updatedAt'];
@@ -16,18 +17,17 @@ const toPublicAccount = (account, role) => ({
 const toPublicUser = (user) => toPublicAccount(user, user.role);
 const toPublicAdmin = (admin) => toPublicAccount(admin, 'admin');
 
-// Tokens are base64("id:email:role"). Older tokens (pre-admin-login) omit the
-// role segment and always referred to a User, so default to 'user' for those.
 const getAuthFromToken = (req) => {
     const authHeader = req.header('authorization') || '';
     const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
     if (!token) return null;
 
-    const [rawId, , rawRole] = Buffer.from(token, 'base64').toString('utf-8').split(':');
-    const id = parseInt(rawId);
-    if (Number.isNaN(id)) return null;
-
-    return { id, role: rawRole || 'user' };
+    try {
+        const payload = jwt.verify(token, process.env.JWT_SECRET);
+        return { id: payload.id, role: payload.role || 'user' };
+    } catch {
+        return null;
+    }
 };
 
 const getMe = async (req, res) => {

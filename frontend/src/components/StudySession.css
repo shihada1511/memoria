@@ -162,10 +162,37 @@
     transform: rotateY(180deg);
 }
 
-.study-flashcard-face p {
-    margin: 0;
+.study-flashcard-content {
     font-size: 0.95rem;
     line-height: 1.5;
+}
+
+.study-flashcard-content p {
+    margin: 0 0 0.4em;
+}
+
+.study-flashcard-content p:last-child {
+    margin-bottom: 0;
+}
+
+.study-flashcard-content strong { font-weight: 700; }
+.study-flashcard-content em { font-style: italic; }
+.study-flashcard-content code {
+    background: rgba(0,0,0,0.1);
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-size: 0.88em;
+    font-family: monospace;
+}
+
+.study-flashcard-content ul,
+.study-flashcard-content ol {
+    margin: 0.3em 0;
+    padding-left: 1.4em;
+}
+
+.study-flashcard-content li {
+    margin: 0.15em 0;
 }
 
 .study-flashcard-label {
@@ -229,4 +256,88 @@
     margin: 0;
     color: var(--text);
     font-weight: 600;
+}
+
+/* ── Answer input area ── */
+.study-answer-area {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.study-answer-input {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--surface);
+    resize: none;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+}
+
+.study-answer-input:focus {
+    border-color: #6b46c1;
+}
+
+.study-answer-input::placeholder {
+    color: var(--text-muted);
+    font-size: 0.82rem;
+}
+
+/* ── Grading feedback ── */
+.study-session-controls-flipped {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.study-grading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    padding: 8px 12px;
+    background: var(--surface-alt);
+    border-radius: 8px;
+}
+
+.study-grading-spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--border);
+    border-top-color: #6b46c1;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.study-grade-result {
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: 8px;
+    line-height: 1.4;
+}
+
+.study-grade-result--correct {
+    background: var(--accent-green-soft);
+    color: #1a6636;
+    border: 1px solid #86efac;
+}
+
+.study-grade-result--incorrect {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
 }

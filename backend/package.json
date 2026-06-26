@@ -19,6 +19,7 @@
     "cors": "^2.8.6",
     "dotenv": "^16.6.1",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
     "mysql2": "^3.11.5",
     "openai": "^6.44.0",
     "sequelize": "^6.37.5",

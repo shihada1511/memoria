@@ -1,8 +1,13 @@
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const { User, Admin } = require('../../models');
 
 const issueSession = (res, account, role) => {
-    const token = Buffer.from(`${account.id}:${account.email}:${role}`).toString('base64');
+    const token = jwt.sign(
+        { id: account.id, email: account.email, role },
+        process.env.JWT_SECRET,
+        { expiresIn: '7d' }
+    );
 
     res.status(200).json({
         success: true,
