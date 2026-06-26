@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import StudySession from '../components/StudySession';
 import Table from '../components/Table';
@@ -9,7 +9,6 @@ const DeckDetail = ({ user }) => {
     const { deckId } = useParams();
     const { state }  = useLocation();
     const navigate   = useNavigate();
-    const cardsRef   = useRef(null);
 
     const deck = {
         id:      parseInt(deckId),
@@ -17,19 +16,20 @@ const DeckDetail = ({ user }) => {
         subject: state?.deck?.subject || '',
     };
 
-    const [cards, setCards]           = useState([]);
-    const [loading, setLoading]       = useState(true);
-    const [error, setError]           = useState('');
+    const [cards, setCards]             = useState([]);
+    const [loading, setLoading]         = useState(true);
+    const [error, setError]             = useState('');
     const [deleteError, setDeleteError] = useState('');
 
-    const [showForm, setShowForm]     = useState(false);
-    const [question, setQuestion]     = useState('');
-    const [answer, setAnswer]         = useState('');
-    const [formError, setFormError]   = useState('');
-    const [creating, setCreating]     = useState(false);
+    const [showForm, setShowForm]   = useState(false);
+    const [question, setQuestion]   = useState('');
+    const [answer, setAnswer]       = useState('');
+    const [formError, setFormError] = useState('');
+    const [creating, setCreating]   = useState(false);
 
-    const [studyActive, setStudyActive]         = useState(false);
-    const [revealAnyway, setRevealAnyway]       = useState(false);
+    const [showStudy, setShowStudy]     = useState(false);
+    const [studyActive, setStudyActive] = useState(false);
+    const [revealAnyway, setRevealAnyway] = useState(false);
 
     useEffect(() => {
         getCardsByDeck(deckId)
@@ -86,37 +86,43 @@ const DeckDetail = ({ user }) => {
             {/* ── Header ─────────────────────────────────────────────────── */}
             <div className="dd-header">
                 <button className="dd-back" onClick={() => navigate('/dashboard')}>← Dashboard</button>
+
                 <div className="dd-header-center">
                     <h1 className="dd-title">{deck.title}</h1>
                     {deck.subject && <span className="dd-subject">{deck.subject}</span>}
                 </div>
-                <div className="dd-header-right">
-                    <span className="dd-card-count">{cards.length} card{cards.length !== 1 ? 's' : ''}</span>
-                    <button className="dd-delete-deck" onClick={handleDeleteDeck}>🗑️ Delete Deck</button>
+
+                <div className="dd-header-actions">
+                    <span className="dd-card-count">{!loading && `${cards.length} card${cards.length !== 1 ? 's' : ''}`}</span>
+                    <button
+                        className={`dd-join-btn ${showStudy ? 'dd-join-btn--active' : ''}`}
+                        onClick={() => { setShowStudy(v => !v); setRevealAnyway(false); }}
+                    >
+                        {showStudy ? '■ End Session' : '▶ Join Session'}
+                    </button>
+                    <button className="dd-delete-deck" onClick={handleDeleteDeck}>🗑️ Delete</button>
                 </div>
             </div>
 
-            {/* ── Study Session ───────────────────────────────────────────── */}
-            <section className="dd-section">
-                <h2 className="dd-section-title">Study Session</h2>
-                <StudySession
-                    deck={deck}
-                    username={user?.username || user?.firstName || 'Anonymous'}
-                    onActiveChange={active => { setStudyActive(active); if (active) setRevealAnyway(false); }}
-                />
-            </section>
+            {/* ── Inline study session (toggled by header button) ─────────── */}
+            {showStudy && (
+                <section className="dd-section dd-study-section">
+                    <StudySession
+                        deck={deck}
+                        username={user?.username || user?.firstName || 'Anonymous'}
+                        onActiveChange={active => { setStudyActive(active); if (active) setRevealAnyway(false); }}
+                    />
+                </section>
+            )}
 
-            {/* ── Cards ──────────────────────────────────────────────────── */}
-            <section className="dd-section" ref={cardsRef}>
+            {/* ── Cards management ────────────────────────────────────────── */}
+            <section className="dd-section">
                 <div className="dd-section-hdr">
                     <h2 className="dd-section-title">
                         Cards
                         {!loading && <span className="dd-badge">{cards.length}</span>}
                     </h2>
-                    <button
-                        className="dd-btn dd-btn--primary"
-                        onClick={() => { setShowForm(v => !v); setFormError(''); }}
-                    >
+                    <button className="dd-btn dd-btn--primary" onClick={() => { setShowForm(v => !v); setFormError(''); }}>
                         {showForm ? 'Cancel' : '+ New Card'}
                     </button>
                 </div>

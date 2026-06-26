@@ -95,7 +95,7 @@ const AIGenerator = ({ decks = [], onCardsAdded }) => {
                 <input
                     className="ai-generator-input"
                     type="text"
-                    placeholder="e.g. The French Revolution, React Hooks, SQL JOINs…"
+                    placeholder="e.g. React Hooks, Eurocode 3, Geomechanics…"
                     value={topic}
                     onChange={(e) => setTopic(e.target.value)}
                     disabled={loading}
