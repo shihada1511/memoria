@@ -6,7 +6,25 @@ let socket = null;
 
 export const getSocket = () => {
     if (!socket) {
-        socket = io(SOCKET_URL, { autoConnect: false });
+        socket = io(SOCKET_URL, {
+            autoConnect: false,
+            transports: ['websocket', 'polling'],
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000,
+        });
+
+        socket.on('connect_error', (err) => {
+            console.error('[Socket] connection error:', err.message);
+        });
+
+        socket.on('connect', () => {
+            console.log('[Socket] connected:', socket.id);
+        });
+
+        socket.on('disconnect', (reason) => {
+            console.log('[Socket] disconnected:', reason);
+        });
     }
     return socket;
 };

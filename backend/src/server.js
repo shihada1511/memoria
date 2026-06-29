@@ -11,9 +11,10 @@ const FRONTEND_URL = process.env.FRONTEND_URL || '*';
 
 const io = new Server(server, {
     cors: {
-        origin: FRONTEND_URL,
+        origin: '*',
         methods: ['GET', 'POST']
-    }
+    },
+    transports: ['websocket', 'polling']
 });
 
 const logger = require('./middleware/logger');
