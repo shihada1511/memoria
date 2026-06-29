@@ -251,6 +251,73 @@
 }
 .sc-note-delete:hover { background: #fee2e2; color: #ef4444; }
 
+.sc-note-btns {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.sc-note-edit-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.75rem;
+    padding: 2px 5px;
+    border-radius: 4px;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: background 0.1s;
+}
+.sc-note-edit-btn:hover { background: #e0e7ff; }
+
+.sc-note-edit-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+}
+
+.sc-edit-input {
+    flex: 1;
+    margin: 0;
+    padding: 5px 8px;
+    font-size: 0.82rem;
+}
+
+.sc-note-save {
+    background: #6b46c1;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    flex-shrink: 0;
+}
+.sc-note-save:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.sc-note-cancel-edit {
+    background: none;
+    border: 1px solid var(--border-strong);
+    border-radius: 5px;
+    padding: 4px 7px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.sc-past-badge {
+    margin-left: 8px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: var(--surface-alt);
+    color: var(--text-muted);
+    border-radius: 999px;
+    padding: 2px 7px;
+    vertical-align: middle;
+}
+
 /* ── Legend ── */
 .sc-legend {
     display: flex;

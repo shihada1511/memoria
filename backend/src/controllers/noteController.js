@@ -29,6 +29,22 @@ const createNote = async (req, res) => {
     }
 };
 
+const updateNote = async (req, res) => {
+    try {
+        const userId = parseInt(req.header('x-user-id'));
+        const id = parseInt(req.params.id);
+        const { text } = req.body;
+        if (!text) return res.status(400).json({ success: false, data: null, error: { code: 'VALIDATION_ERROR', message: 'text is required.', details: {} } });
+        const note = await CalendarNote.findByPk(id);
+        if (!note) return res.status(404).json({ success: false, data: null, error: { code: 'NOT_FOUND', message: 'Note not found.', details: {} } });
+        if (note.userId !== userId) return res.status(403).json({ success: false, data: null, error: { code: 'FORBIDDEN', message: 'You can only update your own notes.', details: {} } });
+        await note.update({ text: text.trim() });
+        res.status(200).json({ success: true, data: note, error: null });
+    } catch {
+        res.status(500).json({ success: false, data: null, error: { code: 'SERVER_ERROR', message: 'An unexpected error occurred.', details: {} } });
+    }
+};
+
 const deleteNote = async (req, res) => {
     try {
         const userId = parseInt(req.header('x-user-id'));
@@ -45,4 +61,4 @@ const deleteNote = async (req, res) => {
     }
 };
 
-module.exports = { getNotes, createNote, deleteNote };
+module.exports = { getNotes, createNote, updateNote, deleteNote };

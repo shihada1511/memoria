@@ -6,14 +6,17 @@ const MONTHS = ['January','February','March','April','May','June','July','August
 
 const toStr = (d) => d.toISOString().slice(0, 10);
 const todayISO = () => toStr(new Date());
+const normalizeDate = (d) => String(d || '').slice(0, 10);
 
 const fmtFull = (dateStr) =>
-    new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    new Date(normalizeDate(dateStr) + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
-const SmartCalendar = ({ heatmapData = [], forecastData = [], notes = [], onNoteAdd, onNoteDelete }) => {
-    const [offset, setOffset] = useState(0);
+const SmartCalendar = ({ heatmapData = [], forecastData = [], notes = [], onNoteAdd, onNoteUpdate, onNoteDelete }) => {
+    const [offset, setOffset]           = useState(0);
     const [pendingDate, setPendingDate] = useState(null);
-    const [noteInput, setNoteInput] = useState('');
+    const [noteInput, setNoteInput]     = useState('');
+    const [editingId, setEditingId]     = useState(null);
+    const [editText, setEditText]       = useState('');
 
     const today = todayISO();
 
@@ -26,40 +29,40 @@ const SmartCalendar = ({ heatmapData = [], forecastData = [], notes = [], onNote
 
     const studyByDate = useMemo(() => {
         const m = {};
-        heatmapData.forEach(({ date, count }) => { m[date] = count; });
+        heatmapData.forEach(({ date, count }) => { m[normalizeDate(date)] = count; });
         return m;
     }, [heatmapData]);
 
     const forecastByDate = useMemo(() => {
         const m = {};
-        forecastData.forEach(({ date, count }) => { if (count > 0) m[date] = count; });
+        forecastData.forEach(({ date, count }) => { if (count > 0) m[normalizeDate(date)] = count; });
         return m;
     }, [forecastData]);
 
     const notesByDate = useMemo(() => {
         const m = {};
         notes.forEach(note => {
-            if (!m[note.date]) m[note.date] = [];
-            m[note.date].push(note);
+            const key = normalizeDate(note.date);
+            if (!m[key]) m[key] = [];
+            m[key].push({ ...note, date: key });
         });
         return m;
     }, [notes]);
 
     const cells = useMemo(() => {
-        const y = viewDate.getFullYear();
+        const y  = viewDate.getFullYear();
         const mo = viewDate.getMonth();
         const first = new Date(y, mo, 1);
         const last  = new Date(y, mo + 1, 0);
-        const startOffset = (first.getDay() + 6) % 7; // Mon=0
+        const startOffset = (first.getDay() + 6) % 7;
 
         const result = [];
-
         for (let i = startOffset - 1; i >= 0; i--) {
             const d = new Date(y, mo, -i);
             result.push({ dateStr: toStr(d), day: d.getDate(), inMonth: false, past: toStr(d) < today });
         }
         for (let day = 1; day <= last.getDate(); day++) {
-            const d = new Date(y, mo, day);
+            const d  = new Date(y, mo, day);
             const ds = toStr(d);
             result.push({ dateStr: ds, day, inMonth: true, past: ds < today, isToday: ds === today });
         }
@@ -71,9 +74,12 @@ const SmartCalendar = ({ heatmapData = [], forecastData = [], notes = [], onNote
     }, [viewDate, today]);
 
     const handleDayClick = (cell) => {
-        if (!cell.inMonth || cell.past || cell.isToday) return;
-        setPendingDate(cell.dateStr === pendingDate ? null : cell.dateStr);
+        if (!cell.inMonth) return;
+        if (cell.past && !notesByDate[cell.dateStr]) return;
+        const next = cell.dateStr === pendingDate ? null : cell.dateStr;
+        setPendingDate(next);
         setNoteInput('');
+        setEditingId(null);
     };
 
     const handleAddNote = () => {
@@ -82,8 +88,20 @@ const SmartCalendar = ({ heatmapData = [], forecastData = [], notes = [], onNote
         setNoteInput('');
     };
 
-    const handleDeleteNote = (id) => {
-        onNoteDelete(id);
+    const handleStartEdit = (note) => {
+        setEditingId(note.id);
+        setEditText(note.text);
+    };
+
+    const handleSaveEdit = (id) => {
+        if (!editText.trim()) return;
+        onNoteUpdate(id, editText.trim());
+        setEditingId(null);
+    };
+
+    const handleCancelEdit = () => {
+        setEditingId(null);
+        setEditText('');
     };
 
     const dotCls = (count) => {
@@ -95,18 +113,22 @@ const SmartCalendar = ({ heatmapData = [], forecastData = [], notes = [], onNote
 
     const cls = (cell) => {
         const c = ['sc-day'];
-        if (!cell.inMonth)              c.push('sc-day--out');
-        if (cell.isToday)               c.push('sc-day--today');
+        if (!cell.inMonth) c.push('sc-day--out');
+        if (cell.isToday)  c.push('sc-day--today');
         if (cell.inMonth && !cell.past && !cell.isToday) c.push('sc-day--future');
-        if (notesByDate[cell.dateStr] && cell.inMonth && !cell.past) c.push('sc-day--has-note');
-        if (cell.dateStr === pendingDate)                 c.push('sc-day--pending');
+        if (cell.inMonth && cell.past && notesByDate[cell.dateStr]) c.push('sc-day--future');
+        if (notesByDate[cell.dateStr] && cell.inMonth) c.push('sc-day--has-note');
+        if (cell.dateStr === pendingDate) c.push('sc-day--pending');
         return c.join(' ');
     };
 
     const forecast = (cell) =>
         cell.inMonth && !cell.past && !cell.isToday && forecastByDate[cell.dateStr]
-            ? `${forecastByDate[cell.dateStr]} card${forecastByDate[cell.dateStr] !== 1 ? 's' : ''} scheduled for review`
+            ? `${forecastByDate[cell.dateStr]} card${forecastByDate[cell.dateStr] !== 1 ? 's' : ''} due`
             : undefined;
+
+    const pendingNotes = pendingDate ? (notesByDate[pendingDate] || []) : [];
+    const isPast = pendingDate && pendingDate < today;
 
     return (
         <div className="sc">
@@ -129,45 +151,79 @@ const SmartCalendar = ({ heatmapData = [], forecastData = [], notes = [], onNote
                         {cell.inMonth && cell.past && dotCls(studyByDate[cell.dateStr]) && (
                             <span className={dotCls(studyByDate[cell.dateStr])} />
                         )}
-                        {cell.inMonth && !cell.past && !cell.isToday && notesByDate[cell.dateStr] && (
+                        {cell.inMonth && notesByDate[cell.dateStr] && (
                             <span className="sc-note-dot" />
                         )}
                     </div>
                 ))}
             </div>
 
-            {/* Note form */}
             {pendingDate && (
                 <div className="sc-form">
-                    <p className="sc-form-label">Notes for <strong>{fmtFull(pendingDate)}</strong></p>
+                    <p className="sc-form-label">
+                        <strong>{fmtFull(pendingDate)}</strong>
+                        {isPast && <span className="sc-past-badge">past</span>}
+                    </p>
 
-                    {(notesByDate[pendingDate] || []).length > 0 && (
+                    {pendingNotes.length > 0 && (
                         <ul className="sc-notes-list">
-                            {(notesByDate[pendingDate] || []).map(note => (
+                            {pendingNotes.map(note => (
                                 <li key={note.id} className="sc-note-item">
-                                    <span className="sc-note-text">{note.text}</span>
-                                    <button className="sc-note-delete" onClick={() => handleDeleteNote(note.id)} title="Remove">✕</button>
+                                    {editingId === note.id ? (
+                                        <div className="sc-note-edit-row">
+                                            <input
+                                                className="sc-form-input sc-edit-input"
+                                                value={editText}
+                                                onChange={e => setEditText(e.target.value)}
+                                                onKeyDown={e => {
+                                                    if (e.key === 'Enter') handleSaveEdit(note.id);
+                                                    if (e.key === 'Escape') handleCancelEdit();
+                                                }}
+                                                autoFocus
+                                            />
+                                            <button className="sc-note-save" onClick={() => handleSaveEdit(note.id)} disabled={!editText.trim()}>✓</button>
+                                            <button className="sc-note-cancel-edit" onClick={handleCancelEdit}>✕</button>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <span className="sc-note-text">{note.text}</span>
+                                            <div className="sc-note-btns">
+                                                <button className="sc-note-edit-btn" onClick={() => handleStartEdit(note)} title="Edit">✏️</button>
+                                                <button className="sc-note-delete" onClick={() => onNoteDelete(note.id)} title="Delete">✕</button>
+                                            </div>
+                                        </>
+                                    )}
                                 </li>
                             ))}
                         </ul>
                     )}
 
-                    <input
-                        className="sc-form-input"
-                        placeholder="Add a note (e.g. Exam, Meeting, Deadline…)"
-                        value={noteInput}
-                        onChange={e => setNoteInput(e.target.value)}
-                        onKeyDown={e => e.key === 'Enter' && handleAddNote()}
-                        autoFocus
-                    />
-                    <div className="sc-form-row">
-                        <button className="sc-form-btn sc-form-btn--set" onClick={handleAddNote} disabled={!noteInput.trim()}>
-                            Add Note
-                        </button>
-                        <button className="sc-form-btn sc-form-btn--cancel" onClick={() => setPendingDate(null)}>
+                    {!isPast && (
+                        <>
+                            <input
+                                className="sc-form-input"
+                                placeholder="Add a note (e.g. Exam, Meeting, Deadline…)"
+                                value={noteInput}
+                                onChange={e => setNoteInput(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && handleAddNote()}
+                                autoFocus={pendingNotes.length === 0}
+                            />
+                            <div className="sc-form-row">
+                                <button className="sc-form-btn sc-form-btn--set" onClick={handleAddNote} disabled={!noteInput.trim()}>
+                                    Add Note
+                                </button>
+                                <button className="sc-form-btn sc-form-btn--cancel" onClick={() => setPendingDate(null)}>
+                                    Close
+                                </button>
+                            </div>
+                        </>
+                    )}
+
+                    {isPast && (
+                        <button className="sc-form-btn sc-form-btn--cancel" style={{ alignSelf: 'flex-start' }} onClick={() => setPendingDate(null)}>
                             Close
                         </button>
-                    </div>
+                    )}
                 </div>
             )}
 
@@ -176,8 +232,9 @@ const SmartCalendar = ({ heatmapData = [], forecastData = [], notes = [], onNote
                     <span className="sc-dot sc-dot--light" /> <span>1–10 cards</span>
                     <span className="sc-dot sc-dot--mid"   /> <span>11–30 cards</span>
                     <span className="sc-dot sc-dot--dark"  /> <span>30+ cards</span>
+                    <span className="sc-note-dot" style={{ marginLeft: 6 }} /> <span>note</span>
                 </div>
-                <p className="sc-hint">Click a future date to add or view notes</p>
+                <p className="sc-hint">Click any date to add or view notes</p>
             </div>
         </div>
     );

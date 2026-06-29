@@ -3,9 +3,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import AIGenerator from '../components/AIGenerator';
 import SmartCalendar from '../components/SmartCalendar';
 import MasteryFunnel from '../components/MasteryFunnel';
-import { getDecks, getCardsByDeck, createDeck, deleteDeck } from '../services/dashboardService';
+import { getDecks, getCardsByDeck, createDeck, updateDeck, deleteDeck } from '../services/dashboardService';
 import { getStats, getDashboardStats } from '../services/statsService';
-import { getNotes, createNote, deleteNote } from '../services/noteService';
+import { getNotes, createNote, updateNote, deleteNote } from '../services/noteService';
 import './Dashboard.css';
 
 const ACCENTS = ['blue', 'purple', 'green', 'amber'];
@@ -28,6 +28,12 @@ const Dashboard = ({ user }) => {
     const [creatingDeck, setCreatingDeck]   = useState(false);
     const [deleteError, setDeleteError]     = useState('');
 
+    const [editingDeckId, setEditingDeckId]       = useState(null);
+    const [editDeckTitle, setEditDeckTitle]       = useState('');
+    const [editDeckSubject, setEditDeckSubject]   = useState('');
+    const [editDeckError, setEditDeckError]       = useState('');
+    const [savingDeck, setSavingDeck]             = useState(false);
+
     const [notes, setNotes] = useState([]);
 
     const handleNoteAdd = async (date, text) => {
@@ -37,11 +43,40 @@ const Dashboard = ({ user }) => {
         } catch { /* silent — note just won't appear */ }
     };
 
+    const handleNoteUpdate = async (id, text) => {
+        try {
+            const updated = await updateNote(id, text);
+            setNotes(prev => prev.map(n => n.id === id ? updated : n));
+        } catch { /* silent */ }
+    };
+
     const handleNoteDelete = async (id) => {
         try {
             await deleteNote(id);
             setNotes(prev => prev.filter(n => n.id !== id));
         } catch { /* silent */ }
+    };
+
+    const handleStartEditDeck = (deck) => {
+        setEditingDeckId(deck.id ?? deck.deckId);
+        setEditDeckTitle(deck.title);
+        setEditDeckSubject(deck.subject);
+        setEditDeckError('');
+    };
+
+    const handleSaveDeck = async (id) => {
+        if (!editDeckTitle.trim() || !editDeckSubject.trim()) return;
+        setSavingDeck(true); setEditDeckError('');
+        try {
+            await updateDeck(id, editDeckTitle.trim(), editDeckSubject.trim());
+            setDecks(prev => prev.map(d => (d.id ?? d.deckId) === id
+                ? { ...d, title: editDeckTitle.trim(), subject: editDeckSubject.trim() }
+                : d
+            ));
+            setEditingDeckId(null);
+        } catch (err) {
+            setEditDeckError(err.response?.data?.error?.message || 'Failed to update deck.');
+        } finally { setSavingDeck(false); }
     };
 
     // Remove a deleted deck from state when returning from DeckDetail
@@ -197,6 +232,7 @@ const Dashboard = ({ user }) => {
                         forecastData={dashboardStats?.forecast || []}
                         notes={notes}
                         onNoteAdd={handleNoteAdd}
+                        onNoteUpdate={handleNoteUpdate}
                         onNoteDelete={handleNoteDelete}
                     />
                 </div>
@@ -255,21 +291,51 @@ const Dashboard = ({ user }) => {
                                 const count = cardCounts[String(id)] ?? 0;
                                 const dest  = `/decks/${id}`;
                                 const st    = { deck };
+                                const isEditing = editingDeckId === id;
                                 return (
                                     <div key={id} className={`db-deck-card db-deck-card--${ACCENTS[i % ACCENTS.length]}`}>
-                                        <div className="db-deck-card-top">
-                                            <span className="db-deck-icon">📚</span>
-                                            <div className="db-deck-info">
-                                                <div className="db-deck-title">{deck.title}</div>
-                                                <div className="db-deck-subject">{deck.subject}</div>
+                                        {isEditing ? (
+                                            <div className="db-deck-edit-form">
+                                                <input
+                                                    className="db-input"
+                                                    value={editDeckTitle}
+                                                    onChange={e => setEditDeckTitle(e.target.value)}
+                                                    placeholder="Deck title"
+                                                    disabled={savingDeck}
+                                                />
+                                                <input
+                                                    className="db-input"
+                                                    value={editDeckSubject}
+                                                    onChange={e => setEditDeckSubject(e.target.value)}
+                                                    placeholder="Subject"
+                                                    disabled={savingDeck}
+                                                />
+                                                {editDeckError && <p className="db-form-error">{editDeckError}</p>}
+                                                <div className="db-deck-edit-actions">
+                                                    <button className="db-btn db-btn--success" onClick={() => handleSaveDeck(id)} disabled={savingDeck || !editDeckTitle.trim() || !editDeckSubject.trim()}>
+                                                        {savingDeck ? 'Saving…' : 'Save'}
+                                                    </button>
+                                                    <button className="db-btn db-btn--ghost" onClick={() => setEditingDeckId(null)} disabled={savingDeck}>Cancel</button>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className="db-deck-count">{count} card{count !== 1 ? 's' : ''}</div>
-                                        <div className="db-deck-actions">
-                                            <button className="db-btn db-btn--study"  onClick={() => navigate(dest, { state: st })}>▶ Study</button>
-                                            <button className="db-btn db-btn--manage" onClick={() => navigate(dest, { state: st })} title="Manage Cards">⚙️</button>
-                                            <button className="db-del-btn"            onClick={() => handleDeleteDeck(id)}>🗑️</button>
-                                        </div>
+                                        ) : (
+                                            <>
+                                                <div className="db-deck-card-top">
+                                                    <span className="db-deck-icon">📚</span>
+                                                    <div className="db-deck-info">
+                                                        <div className="db-deck-title">{deck.title}</div>
+                                                        <div className="db-deck-subject">{deck.subject}</div>
+                                                    </div>
+                                                </div>
+                                                <div className="db-deck-count">{count} card{count !== 1 ? 's' : ''}</div>
+                                                <div className="db-deck-actions">
+                                                    <button className="db-btn db-btn--study"  onClick={() => navigate(dest, { state: st })}>▶ Study</button>
+                                                    <button className="db-btn db-btn--manage" onClick={() => navigate(dest, { state: st })} title="Manage Cards">⚙️</button>
+                                                    <button className="db-btn db-btn--manage" onClick={() => handleStartEditDeck(deck)} title="Edit Deck">✏️</button>
+                                                    <button className="db-del-btn"            onClick={() => handleDeleteDeck(id)}>🗑️</button>
+                                                </div>
+                                            </>
+                                        )}
                                     </div>
                                 );
                             })}

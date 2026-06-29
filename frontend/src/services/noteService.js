@@ -10,6 +10,11 @@ export const createNote = async (date, text) => {
     return res.data.data;
 };
 
+export const updateNote = async (id, text) => {
+    const res = await api.put(`/notes/${id}`, { text });
+    return res.data.data;
+};
+
 export const deleteNote = async (id) => {
     const res = await api.delete(`/notes/${id}`);
     return res.data.data;

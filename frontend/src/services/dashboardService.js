@@ -20,6 +20,11 @@ export const createCard = async (deckId, question, answer) => {
   return response.data.data;
 };
 
+export const updateDeck = async (deckId, title, subject) => {
+  const response = await api.put(`/decks/${deckId}`, { title, subject });
+  return response.data.data;
+};
+
 export const deleteDeck = async (deckId) => {
   const response = await api.delete(`/decks/${deckId}`);
   return response.data.data;
