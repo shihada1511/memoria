@@ -7,6 +7,9 @@ module.exports = (sequelize, DataTypes) => {
       Deck.belongsTo(models.User, { foreignKey: 'userId', as: 'owner' });
       Deck.hasMany(models.Card, { foreignKey: 'deckId', as: 'cards', onDelete: 'CASCADE' });
       Deck.belongsToMany(models.Tag, { through: models.DeckTag, foreignKey: 'deckId', otherKey: 'tagId', as: 'tags' });
+      Deck.hasMany(models.DeckRequest, { foreignKey: 'deckId', as: 'requests', onDelete: 'CASCADE' });
+      Deck.hasMany(models.DeckAccess, { foreignKey: 'deckId', as: 'accessList', onDelete: 'CASCADE' });
+      Deck.hasMany(models.DeckMessage, { foreignKey: 'deckId', as: 'messages', onDelete: 'CASCADE' });
     }
   }
   Deck.init({
@@ -16,6 +19,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: { model: 'Users', key: 'id' }
+    },
+    isPublic: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
     }
   }, {
     sequelize,

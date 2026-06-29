@@ -1,4 +1,4 @@
-const { Deck, User, Card, Tag } = require('../../models');
+const { Deck, User, Card, Tag, DeckAccess } = require('../../models');
 
 const DECK_INCLUDE = [
     { model: User, as: 'owner', attributes: ['id', 'firstName', 'lastName', 'email'] },
@@ -10,10 +10,27 @@ const getAllDecks = async (req, res) => {
         const requesterId = parseInt(req.header('x-user-id'));
         const requesterRole = req.header('x-user-role');
 
-        const where = requesterRole === 'admin' ? {} : { userId: requesterId };
+        if (requesterRole === 'admin') {
+            const decks = await Deck.findAll({ include: DECK_INCLUDE, order: [['id', 'ASC']] });
+            return res.status(200).json({ success: true, data: decks, error: null });
+        }
 
-        const decks = await Deck.findAll({ where, include: DECK_INCLUDE, order: [['id', 'ASC']] });
-        res.status(200).json({ success: true, data: decks, error: null });
+        const ownedDecks = await Deck.findAll({
+            where: { userId: requesterId },
+            include: DECK_INCLUDE,
+            order: [['id', 'ASC']]
+        });
+
+        const accessRecords = await DeckAccess.findAll({
+            where: { userId: requesterId },
+            include: [{ model: Deck, as: 'deck', include: DECK_INCLUDE }]
+        });
+
+        const sharedDecks = accessRecords
+            .filter(a => a.deck)
+            .map(a => ({ ...a.deck.toJSON(), shared: true }));
+
+        res.status(200).json({ success: true, data: [...ownedDecks.map(d => d.toJSON()), ...sharedDecks], error: null });
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -44,15 +61,21 @@ const getDeckById = async (req, res) => {
             });
         }
 
-        if (requesterRole !== 'admin' && deck.userId !== requesterId) {
-            return res.status(403).json({
-                success: false,
-                data: null,
-                error: {code: "FORBIDDEN", message: "You do not have access to this deck.", details: {}}
-            });
+        const isOwner = deck.userId === requesterId;
+        const isAdmin = requesterRole === 'admin';
+
+        if (!isOwner && !isAdmin) {
+            const hasAccess = await DeckAccess.findOne({ where: { deckId: id, userId: requesterId } });
+            if (!hasAccess) {
+                return res.status(403).json({
+                    success: false,
+                    data: null,
+                    error: {code: "FORBIDDEN", message: "You do not have access to this deck.", details: {}}
+                });
+            }
         }
 
-        res.status(200).json({success: true, data: deck, error: null});
+        res.status(200).json({success: true, data: { ...deck.toJSON(), isOwner }, error: null});
     } catch (error) {
         res.status(500).json({
             success: false,

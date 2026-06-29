@@ -282,11 +282,11 @@ const Dashboard = ({ user }) => {
                         </form>
                     )}
 
-                    {decks.length === 0 ? (
+                    {decks.filter(d => !d.shared).length === 0 ? (
                         <div className="db-empty">No decks yet. Create one to get started!</div>
                     ) : (
                         <div className="db-deck-grid">
-                            {decks.map((deck, i) => {
+                            {decks.filter(d => !d.shared).map((deck, i) => {
                                 const id    = deck.id ?? deck.deckId;
                                 const count = cardCounts[String(id)] ?? 0;
                                 const dest  = `/decks/${id}`;
@@ -342,6 +342,41 @@ const Dashboard = ({ user }) => {
                                 );
                             })}
                         </div>
+                    )}
+
+                    {/* ── Shared with Me ── */}
+                    {decks.filter(d => d.shared).length > 0 && (
+                        <>
+                            <div className="db-section-hdr" style={{ marginTop: '28px' }}>
+                                <h2>Shared with Me</h2>
+                            </div>
+                            <div className="db-deck-grid">
+                                {decks.filter(d => d.shared).map((deck, i) => {
+                                    const id    = deck.id ?? deck.deckId;
+                                    const count = cardCounts[String(id)] ?? 0;
+                                    const dest  = `/decks/${id}`;
+                                    const st    = { deck };
+                                    return (
+                                        <div key={`shared-${id}`} className={`db-deck-card db-deck-card--${ACCENTS[i % ACCENTS.length]} db-deck-card--shared`}>
+                                            <div className="db-deck-card-top">
+                                                <span className="db-deck-icon">🤝</span>
+                                                <div className="db-deck-info">
+                                                    <div className="db-deck-title">{deck.title}</div>
+                                                    <div className="db-deck-subject">{deck.subject}</div>
+                                                </div>
+                                            </div>
+                                            <div className="db-deck-count">{count} card{count !== 1 ? 's' : ''}</div>
+                                            <div className="db-deck-actions">
+                                                <button className="db-btn db-btn--study" onClick={() => navigate(dest, { state: st })}>▶ Study</button>
+                                            </div>
+                                            <div className="db-deck-icon-row">
+                                                <button className="db-btn db-btn--manage" onClick={() => navigate(dest, { state: st })} title="Open Deck">⚙️</button>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </>
                     )}
                 </div>
             )}

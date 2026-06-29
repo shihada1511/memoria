@@ -223,6 +223,40 @@
 .dd-q { font-weight: 600; color: var(--text); }
 .dd-a { color: var(--text-secondary); }
 
+.dd-public-btn {
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-strong);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.12s, color 0.12s;
+    white-space: nowrap;
+}
+.dd-public-btn:hover:not(:disabled) { background: var(--surface-alt); color: var(--text); }
+.dd-public-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.dd-public-btn--on {
+    border-color: #6b46c1;
+    color: #6b46c1;
+    background: rgba(107, 70, 193, 0.08);
+}
+
+.dd-shared-badge {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: #dbeafe;
+    color: #1e40af;
+    border-radius: 999px;
+    padding: 2px 8px;
+    vertical-align: middle;
+}
+[data-theme="dark"] .dd-shared-badge { background: #1e3a5f; color: #93c5fd; }
+
 /* ── Responsive ── */
 @media (max-width: 600px) {
     .dd-page { padding: 16px 12px 40px; }

@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import StudySession from '../components/StudySession';
 import Table from '../components/Table';
+import DeckChat from '../components/DeckChat';
 import { getCardsByDeck, createCard, deleteCard, deleteDeck } from '../services/dashboardService';
+import { togglePublic } from '../services/shareService';
 import './DeckDetail.css';
 
 const DeckDetail = ({ user }) => {
@@ -10,11 +12,19 @@ const DeckDetail = ({ user }) => {
     const { state }  = useLocation();
     const navigate   = useNavigate();
 
+    const deckFromState = state?.deck || {};
     const deck = {
-        id:      parseInt(deckId),
-        title:   state?.deck?.title   || `Deck #${deckId}`,
-        subject: state?.deck?.subject || '',
+        id:       parseInt(deckId),
+        title:    deckFromState.title   || `Deck #${deckId}`,
+        subject:  deckFromState.subject || '',
+        userId:   deckFromState.userId  ?? deckFromState.owner?.id,
+        isPublic: deckFromState.isPublic ?? false,
+        shared:   deckFromState.shared  ?? false,
     };
+
+    const isOwner = deck.userId != null
+        ? String(deck.userId) === String(user?.userId)
+        : true;
 
     const [cards, setCards]             = useState([]);
     const [loading, setLoading]         = useState(true);
@@ -27,9 +37,12 @@ const DeckDetail = ({ user }) => {
     const [formError, setFormError] = useState('');
     const [creating, setCreating]   = useState(false);
 
-    const [showStudy, setShowStudy]     = useState(false);
-    const [studyActive, setStudyActive] = useState(false);
+    const [showStudy, setShowStudy]       = useState(false);
+    const [studyActive, setStudyActive]   = useState(false);
     const [revealAnyway, setRevealAnyway] = useState(false);
+
+    const [isPublic, setIsPublic]         = useState(deck.isPublic);
+    const [togglingPublic, setTogglingPublic] = useState(false);
 
     useEffect(() => {
         getCardsByDeck(deckId)
@@ -72,12 +85,23 @@ const DeckDetail = ({ user }) => {
         }
     };
 
+    const handleTogglePublic = async () => {
+        setTogglingPublic(true);
+        try {
+            const result = await togglePublic(parseInt(deckId));
+            setIsPublic(result.isPublic);
+        } catch (err) {
+            setDeleteError(err.response?.data?.error?.message || 'Failed to change visibility.');
+        } finally { setTogglingPublic(false); }
+    };
+
     const tableColumns = [
         { key: 'question', header: 'Question', render: r => <span className="dd-q">{r.question}</span> },
         { key: 'answer',   header: 'Answer',   render: r => <span className="dd-a">{r.answer}</span> },
-        { key: 'del',      header: '',         render: r => (
-            <button className="dd-del" onClick={() => handleDeleteCard(r.id)} title="Delete">🗑️</button>
-        )},
+        ...(isOwner ? [{
+            key: 'del', header: '',
+            render: r => <button className="dd-del" onClick={() => handleDeleteCard(r.id)} title="Delete">🗑️</button>
+        }] : []),
     ];
 
     return (
@@ -90,21 +114,34 @@ const DeckDetail = ({ user }) => {
                 <div className="dd-header-center">
                     <h1 className="dd-title">{deck.title}</h1>
                     {deck.subject && <span className="dd-subject">{deck.subject}</span>}
+                    {deck.shared && <span className="dd-shared-badge">Shared</span>}
                 </div>
 
                 <div className="dd-header-actions">
                     <span className="dd-card-count">{!loading && `${cards.length} card${cards.length !== 1 ? 's' : ''}`}</span>
+                    {isOwner && (
+                        <button
+                            className={`dd-public-btn ${isPublic ? 'dd-public-btn--on' : ''}`}
+                            onClick={handleTogglePublic}
+                            disabled={togglingPublic}
+                            title={isPublic ? 'Make private' : 'Make public'}
+                        >
+                            {isPublic ? '🌍 Public' : '🔒 Private'}
+                        </button>
+                    )}
                     <button
                         className={`dd-join-btn ${showStudy ? 'dd-join-btn--active' : ''}`}
                         onClick={() => { setShowStudy(v => !v); setRevealAnyway(false); }}
                     >
                         {showStudy ? '■ End Session' : '▶ Join Session'}
                     </button>
-                    <button className="dd-delete-deck" onClick={handleDeleteDeck}>🗑️ Delete</button>
+                    {isOwner && (
+                        <button className="dd-delete-deck" onClick={handleDeleteDeck}>🗑️ Delete</button>
+                    )}
                 </div>
             </div>
 
-            {/* ── Inline study session (toggled by header button) ─────────── */}
+            {/* ── Inline study session ────────────────────────────────────── */}
             {showStudy && (
                 <section className="dd-section dd-study-section">
                     <StudySession
@@ -122,12 +159,14 @@ const DeckDetail = ({ user }) => {
                         Cards
                         {!loading && <span className="dd-badge">{cards.length}</span>}
                     </h2>
-                    <button className="dd-btn dd-btn--primary" onClick={() => { setShowForm(v => !v); setFormError(''); }}>
-                        {showForm ? 'Cancel' : '+ New Card'}
-                    </button>
+                    {isOwner && (
+                        <button className="dd-btn dd-btn--primary" onClick={() => { setShowForm(v => !v); setFormError(''); }}>
+                            {showForm ? 'Cancel' : '+ New Card'}
+                        </button>
+                    )}
                 </div>
 
-                {showForm && (
+                {isOwner && showForm && (
                     <form className="dd-form" onSubmit={handleCreate}>
                         <input className="dd-input" placeholder="Question" value={question} onChange={e => setQuestion(e.target.value)} disabled={creating} />
                         <input className="dd-input" placeholder="Answer"   value={answer}   onChange={e => setAnswer(e.target.value)}   disabled={creating} />
@@ -152,6 +191,12 @@ const DeckDetail = ({ user }) => {
                 ) : (
                     <Table columns={tableColumns} rows={cards} emptyMessage="No cards yet. Add one above!" />
                 )}
+            </section>
+
+            {/* ── Deck Chat ──────────────────────────────────────────────── */}
+            <section className="dd-section">
+                <h2 className="dd-section-title" style={{ marginBottom: '12px' }}>💬 Deck Chat</h2>
+                <DeckChat deckId={parseInt(deckId)} user={user} />
             </section>
 
         </div>

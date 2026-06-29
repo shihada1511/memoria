@@ -9,6 +9,7 @@ import ManageUsers from './pages/ManageUsers';
 import Stats from './pages/Stats';
 import Study from './pages/Study';
 import DeckDetail from './pages/DeckDetail';
+import Discover from './pages/Discover';
 import { getCurrentUser, isAuthenticated } from './services/authService';
 
 const App = () => {
@@ -70,6 +71,7 @@ const App = () => {
       >
         <Route path="/dashboard" element={<Dashboard user={user} />} />
         <Route path="/decks/:deckId" element={<DeckDetail user={user} />} />
+        <Route path="/discover" element={<Discover />} />
         <Route path="/study" element={<Study />} />
         <Route path="/stats" element={<Stats />} />
         <Route path="/settings" element={<Settings onUserUpdated={(updated) => setUser((prev) => ({ ...prev, ...updated }))} />} />

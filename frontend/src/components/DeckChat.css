@@ -1,0 +1,117 @@
+.dc {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--surface);
+    height: 340px;
+}
+
+.dc-header {
+    padding: 12px 16px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-alt);
+}
+
+.dc-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.dc-empty {
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    text-align: center;
+    margin: auto;
+}
+
+.dc-msg {
+    display: flex;
+    flex-direction: column;
+    max-width: 75%;
+    gap: 2px;
+}
+
+.dc-msg--me {
+    align-self: flex-end;
+    align-items: flex-end;
+}
+
+.dc-msg--them {
+    align-self: flex-start;
+    align-items: flex-start;
+}
+
+.dc-msg-user {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 0 6px;
+}
+
+.dc-msg-bubble {
+    padding: 8px 12px;
+    border-radius: 14px;
+    font-size: 0.88rem;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.dc-msg--me .dc-msg-bubble {
+    background: #6b46c1;
+    color: #fff;
+    border-bottom-right-radius: 4px;
+}
+
+.dc-msg--them .dc-msg-bubble {
+    background: var(--surface-alt);
+    color: var(--text);
+    border-bottom-left-radius: 4px;
+    border: 1px solid var(--border);
+}
+
+.dc-msg-time {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    padding: 0 6px;
+}
+
+.dc-input-row {
+    display: flex;
+    border-top: 1px solid var(--border);
+}
+
+.dc-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: none;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.88rem;
+    font-family: inherit;
+    outline: none;
+}
+
+.dc-send {
+    padding: 10px 18px;
+    background: #6b46c1;
+    color: #fff;
+    border: none;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: opacity 0.15s;
+}
+.dc-send:disabled { opacity: 0.4; cursor: not-allowed; }
+.dc-send:hover:not(:disabled) { opacity: 0.85; }

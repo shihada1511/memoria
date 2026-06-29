@@ -431,6 +431,11 @@
     .db-deck-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
 }
 
+.db-deck-card--shared {
+    opacity: 0.92;
+    border-style: dashed;
+}
+
 @media (max-width: 600px) {
     .db-page { padding: 14px 12px 40px; }
     .db-home-grid {

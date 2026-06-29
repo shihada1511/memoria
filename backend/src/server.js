@@ -27,7 +27,10 @@ const settingsRoutes = require('./routers/settingsRoutes');
 const aiRoutes = require('./routers/aiRoutes');
 const statsRoutes = require('./routers/statsRoutes');
 const noteRoutes = require('./routers/noteRoutes');
+const shareRoutes = require('./routers/shareRoutes');
+const chatRoutes = require('./routers/chatRoutes');
 const socketHandler = require('./socket/socketHandler');
+const socketInstance = require('./socket/socketInstance');
 const { sequelize } = require('../models');
 
 app.use(cors({ origin: FRONTEND_URL }));
@@ -47,7 +50,10 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/notes', noteRoutes);
+app.use('/api/share', shareRoutes);
+app.use('/api/chat', chatRoutes);
 
+socketInstance.setIO(io);
 socketHandler(io);
 
 const PORT = process.env.PORT || 3000;

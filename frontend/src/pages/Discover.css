@@ -1,0 +1,126 @@
+.disc-page {
+    padding: 28px;
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.disc-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--text);
+    margin: 0;
+}
+
+.disc-sub {
+    margin: -12px 0 0;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+}
+
+.disc-form {
+    display: flex;
+    gap: 10px;
+}
+
+.disc-input {
+    flex: 1;
+    padding: 10px 14px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+}
+.disc-input:focus { outline: none; border-color: #6b46c1; }
+
+.disc-btn {
+    padding: 10px 22px;
+    background: #6b46c1;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+    transition: opacity 0.15s;
+}
+.disc-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.disc-btn:hover:not(:disabled) { opacity: 0.85; }
+
+.disc-error {
+    color: var(--danger);
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.disc-empty {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 28px;
+    border: 1px dashed var(--border-strong);
+    border-radius: 12px;
+    font-size: 0.88rem;
+}
+
+.disc-results {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.disc-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    gap: 16px;
+}
+
+.disc-card-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text);
+}
+
+.disc-card-meta {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 3px;
+}
+
+.disc-request-btn {
+    padding: 7px 16px;
+    background: #6b46c1;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+    transition: opacity 0.15s;
+    flex-shrink: 0;
+}
+.disc-request-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.disc-request-btn:hover:not(:disabled) { opacity: 0.85; }
+
+.disc-badge {
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+.disc-badge--access   { background: #d1fae5; color: #065f46; }
+.disc-badge--pending  { background: #fef3c7; color: #92400e; }
+.disc-badge--rejected { background: #fee2e2; color: #991b1b; }
