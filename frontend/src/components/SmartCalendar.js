@@ -22,6 +22,7 @@ const SmartCalendar = ({ heatmapData = [], forecastData = [], notes = [], onNote
     const [noteInput, setNoteInput]     = useState('');
     const [editingId, setEditingId]     = useState(null);
     const [editText, setEditText]       = useState('');
+    const [hoverInfo, setHoverInfo]     = useState(null);
 
     const today = todayISO();
 
@@ -109,6 +110,14 @@ const SmartCalendar = ({ heatmapData = [], forecastData = [], notes = [], onNote
         setEditText('');
     };
 
+    const handleMouseEnter = (cell, e) => {
+        if (!cell.inMonth || !notesByDate[cell.dateStr]) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        setHoverInfo({ dateStr: cell.dateStr, x: rect.left + rect.width / 2, y: rect.top });
+    };
+
+    const handleMouseLeave = () => setHoverInfo(null);
+
     const dotCls = (count) => {
         if (!count) return null;
         if (count > 30) return 'sc-dot sc-dot--dark';
@@ -151,6 +160,8 @@ const SmartCalendar = ({ heatmapData = [], forecastData = [], notes = [], onNote
                         className={cls(cell)}
                         onClick={() => handleDayClick(cell)}
                         data-tooltip={forecast(cell)}
+                        onMouseEnter={e => handleMouseEnter(cell, e)}
+                        onMouseLeave={handleMouseLeave}
                     >
                         <span className="sc-num">{cell.day}</span>
                         {cell.inMonth && cell.past && dotCls(studyByDate[cell.dateStr]) && (
@@ -229,6 +240,18 @@ const SmartCalendar = ({ heatmapData = [], forecastData = [], notes = [], onNote
                             Close
                         </button>
                     )}
+                </div>
+            )}
+
+            {hoverInfo && notesByDate[hoverInfo.dateStr] && (
+                <div
+                    className="sc-hover-panel"
+                    style={{ left: hoverInfo.x, top: hoverInfo.y }}
+                >
+                    <div className="sc-hover-date">{fmtFull(hoverInfo.dateStr)}</div>
+                    {notesByDate[hoverInfo.dateStr].map(n => (
+                        <div key={n.id} className="sc-hover-note">📌 {n.text}</div>
+                    ))}
                 </div>
             )}
 
