@@ -54,10 +54,18 @@ const AIGenerator = ({ decks = [], onCardsAdded }) => {
 
     const handleGenerate = async (e) => {
         e.preventDefault();
-        if (!topic.trim() && !imageBase64) return;
+        setError('');
+
+        if (!topic.trim() && !imageBase64) {
+            setError('Please enter a topic or upload an image before generating.');
+            return;
+        }
+        if (topic.trim() && topic.trim().length < 3) {
+            setError('Topic is too short — please enter at least 3 characters.');
+            return;
+        }
 
         setLoading(true);
-        setError('');
         setUploadError('');
         setAddError('');
         setAddSuccess('');
@@ -92,10 +100,17 @@ const AIGenerator = ({ decks = [], onCardsAdded }) => {
     };
 
     const handleAddToDeck = async () => {
-        if (!selectedDeckId || selectedCards.size === 0) return;
+        setAddError('');
+        if (!selectedDeckId) {
+            setAddError('Please select a deck to add the cards to.');
+            return;
+        }
+        if (selectedCards.size === 0) {
+            setAddError('Please select at least one card to add.');
+            return;
+        }
 
         setAdding(true);
-        setAddError('');
         setAddSuccess('');
         try {
             const cardsToAdd = generatedCards.cards.filter((_, i) => selectedCards.has(i));
@@ -186,13 +201,17 @@ const AIGenerator = ({ decks = [], onCardsAdded }) => {
                             ))}
                         </select>
                     </label>
-                    <button className="ai-generator-btn" type="submit" disabled={loading || (!topic.trim() && !imageBase64)}>
+                    <button className="ai-generator-btn" type="submit" disabled={loading}>
                         {loading ? 'Generating…' : 'Generate ✨'}
                     </button>
                 </div>
             </form>
 
-            {error && <p className="ai-generator-error">{error}</p>}
+            {error && (
+                <div className="ai-generator-error-box">
+                    ⚠️ {error}
+                </div>
+            )}
             {addSuccess && <p className="ai-generator-success">{addSuccess}</p>}
 
             {generatedCards && (
@@ -245,7 +264,7 @@ const AIGenerator = ({ decks = [], onCardsAdded }) => {
                                     type="button"
                                     className="ai-generator-btn"
                                     onClick={handleAddToDeck}
-                                    disabled={adding || selectedCards.size === 0}
+                                    disabled={adding}
                                 >
                                     {adding ? 'Adding…' : `Add ${selectedCards.size} to deck`}
                                 </button>
