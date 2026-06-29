@@ -25,6 +25,7 @@ const authRoutes = require('./routers/authRoutes');
 const settingsRoutes = require('./routers/settingsRoutes');
 const aiRoutes = require('./routers/aiRoutes');
 const statsRoutes = require('./routers/statsRoutes');
+const noteRoutes = require('./routers/noteRoutes');
 const socketHandler = require('./socket/socketHandler');
 const { sequelize } = require('../models');
 
@@ -44,6 +45,7 @@ app.use('/api/cards', cardRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/notes', noteRoutes);
 
 socketHandler(io);
 

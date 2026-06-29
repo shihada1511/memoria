@@ -5,13 +5,10 @@ import SmartCalendar from '../components/SmartCalendar';
 import MasteryFunnel from '../components/MasteryFunnel';
 import { getDecks, getCardsByDeck, createDeck, deleteDeck } from '../services/dashboardService';
 import { getStats, getDashboardStats } from '../services/statsService';
+import { getNotes, createNote, deleteNote } from '../services/noteService';
 import './Dashboard.css';
 
 const ACCENTS = ['blue', 'purple', 'green', 'amber'];
-const EXAM_KEY = 'memoria_exam';
-
-const loadExam = () => { try { return JSON.parse(localStorage.getItem(EXAM_KEY)) || null; } catch { return null; } };
-const saveExam = (date, name) => { date ? localStorage.setItem(EXAM_KEY, JSON.stringify({ date, name })) : localStorage.removeItem(EXAM_KEY); };
 
 const Dashboard = ({ user }) => {
     const navigate  = useNavigate();
@@ -31,14 +28,20 @@ const Dashboard = ({ user }) => {
     const [creatingDeck, setCreatingDeck]   = useState(false);
     const [deleteError, setDeleteError]     = useState('');
 
-    const saved = useMemo(() => loadExam(), []);
-    const [examDate, setExamDate] = useState(saved?.date || null);
-    const [examName, setExamName] = useState(saved?.name || '');
+    const [notes, setNotes] = useState([]);
 
-    const handleExamSet = (date, name) => {
-        setExamDate(date || null);
-        setExamName(name || '');
-        saveExam(date, name);
+    const handleNoteAdd = async (date, text) => {
+        try {
+            const note = await createNote(date, text);
+            setNotes(prev => [...prev, note]);
+        } catch { /* silent — note just won't appear */ }
+    };
+
+    const handleNoteDelete = async (id) => {
+        try {
+            await deleteNote(id);
+            setNotes(prev => prev.filter(n => n.id !== id));
+        } catch { /* silent */ }
     };
 
     // Remove a deleted deck from state when returning from DeckDetail
@@ -56,15 +59,17 @@ const Dashboard = ({ user }) => {
         const load = async () => {
             setLoading(true); setError('');
             try {
-                const [deckList, statsData, dsData] = await Promise.all([
+                const [deckList, statsData, dsData, notesData] = await Promise.all([
                     getDecks(),
                     getStats().catch(() => null),
-                    getDashboardStats().catch(() => null)
+                    getDashboardStats().catch(() => null),
+                    getNotes().catch(() => [])
                 ]);
                 if (cancelled) return;
                 setDecks(deckList);
                 setStats(statsData);
                 setDashboardStats(dsData);
+                setNotes(notesData);
 
                 // Fetch card counts (not the cards themselves — those live in DeckDetail)
                 const counts = await Promise.all(
@@ -89,17 +94,13 @@ const Dashboard = ({ user }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const examBanner = useMemo(() => {
-        if (!examDate || !examName || !dashboardStats) return null;
-        const todayMs = new Date(new Date().toISOString().slice(0, 10) + 'T00:00:00').getTime();
-        const examMs  = new Date(examDate + 'T00:00:00').getTime();
-        const daysLeft = Math.round((examMs - todayMs) / 86400000);
-        if (daysLeft <= 0) return null;
-        const { mastery } = dashboardStats;
-        const unmastered = (mastery?.new || 0) + (mastery?.learning || 0) + (mastery?.familiar || 0);
-        const perDay = Math.max(1, Math.ceil(unmastered / daysLeft));
-        return { daysLeft, perDay, unmastered };
-    }, [examDate, examName, dashboardStats]);
+    const upcomingNotes = useMemo(() => {
+        const today = new Date().toISOString().slice(0, 10);
+        return notes
+            .filter(n => n.date >= today)
+            .sort((a, b) => a.date.localeCompare(b.date))
+            .slice(0, 3);
+    }, [notes]);
 
     const handleCreateDeck = async (e) => {
         e.preventDefault();
@@ -135,15 +136,20 @@ const Dashboard = ({ user }) => {
     return (
         <div className="db-page">
 
-            {/* ── Exam countdown banner ──────────────────────────────────── */}
-            {examBanner && (
+            {/* ── Upcoming notes banner ──────────────────────────────────── */}
+            {upcomingNotes.length > 0 && (
                 <div className="db-exam-banner">
-                    <span>
-                        📅 <strong>{examBanner.daysLeft} day{examBanner.daysLeft !== 1 ? 's' : ''}</strong> until <strong>{examName}</strong>.
-                        {' '}Study <strong>{examBanner.perDay} card{examBanner.perDay !== 1 ? 's' : ''}/day</strong> to reach 100% mastery.
-                        <span className="db-exam-unmastered"> ({examBanner.unmastered} cards left to master)</span>
-                    </span>
-                    <button className="db-exam-dismiss" onClick={() => handleExamSet(null, null)} title="Remove exam">✕</button>
+                    {upcomingNotes.map(note => {
+                        const todayMs = new Date(new Date().toISOString().slice(0, 10) + 'T00:00:00').getTime();
+                        const noteMs  = new Date(note.date + 'T00:00:00').getTime();
+                        const daysLeft = Math.round((noteMs - todayMs) / 86400000);
+                        return (
+                            <div key={note.id} className="db-exam-banner-row">
+                                <span>📅 <strong>{daysLeft} day{daysLeft !== 1 ? 's' : ''}</strong> — {note.text}</span>
+                                <button className="db-exam-dismiss" onClick={() => handleNoteDelete(note.id)} title="Remove">✕</button>
+                            </div>
+                        );
+                    })}
                 </div>
             )}
 
@@ -189,9 +195,9 @@ const Dashboard = ({ user }) => {
                     <SmartCalendar
                         heatmapData={stats?.heatmap || []}
                         forecastData={dashboardStats?.forecast || []}
-                        examDate={examDate}
-                        examName={examName}
-                        onExamSet={handleExamSet}
+                        notes={notes}
+                        onNoteAdd={handleNoteAdd}
+                        onNoteDelete={handleNoteDelete}
                     />
                 </div>
 

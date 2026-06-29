@@ -86,11 +86,20 @@
 }
 .sc-day--future:hover { background: var(--surface-alt); }
 
-.sc-day--exam {
+.sc-day--has-note {
     border: 2px solid #f97316 !important;
     background: rgba(249, 115, 22, 0.1) !important;
 }
-.sc-day--exam .sc-num { color: #f97316; font-weight: 800; }
+.sc-day--has-note .sc-num { color: #f97316; font-weight: 800; }
+
+.sc-note-dot {
+    display: block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #f97316;
+    flex-shrink: 0;
+}
 
 .sc-day--pending {
     border: 2px dashed #6b46c1;
@@ -201,6 +210,46 @@
 .sc-form-btn--set:hover:not(:disabled) { opacity: 0.85; }
 .sc-form-btn--cancel { background: var(--surface); border: 1px solid var(--border-strong); color: var(--text-secondary); }
 .sc-form-btn--cancel:hover { background: var(--surface-alt); }
+
+.sc-notes-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sc-note-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 6px 10px;
+    gap: 8px;
+}
+
+.sc-note-text {
+    font-size: 0.82rem;
+    color: var(--text);
+    flex: 1;
+}
+
+.sc-note-delete {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.75rem;
+    padding: 2px 5px;
+    border-radius: 4px;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: background 0.1s, color 0.1s;
+}
+.sc-note-delete:hover { background: #fee2e2; color: #ef4444; }
 
 /* ── Legend ── */
 .sc-legend {

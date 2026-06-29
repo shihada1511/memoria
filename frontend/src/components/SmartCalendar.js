@@ -10,10 +10,10 @@ const todayISO = () => toStr(new Date());
 const fmtFull = (dateStr) =>
     new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
-const SmartCalendar = ({ heatmapData = [], forecastData = [], examDate, examName, onExamSet }) => {
+const SmartCalendar = ({ heatmapData = [], forecastData = [], notes = [], onNoteAdd, onNoteDelete }) => {
     const [offset, setOffset] = useState(0);
     const [pendingDate, setPendingDate] = useState(null);
-    const [examInput, setExamInput] = useState('');
+    const [noteInput, setNoteInput] = useState('');
 
     const today = todayISO();
 
@@ -35,6 +35,15 @@ const SmartCalendar = ({ heatmapData = [], forecastData = [], examDate, examName
         forecastData.forEach(({ date, count }) => { if (count > 0) m[date] = count; });
         return m;
     }, [forecastData]);
+
+    const notesByDate = useMemo(() => {
+        const m = {};
+        notes.forEach(note => {
+            if (!m[note.date]) m[note.date] = [];
+            m[note.date].push(note);
+        });
+        return m;
+    }, [notes]);
 
     const cells = useMemo(() => {
         const y = viewDate.getFullYear();
@@ -63,16 +72,18 @@ const SmartCalendar = ({ heatmapData = [], forecastData = [], examDate, examName
 
     const handleDayClick = (cell) => {
         if (!cell.inMonth || cell.past || cell.isToday) return;
-        if (cell.dateStr === examDate) { onExamSet(null, null); return; }
-        setPendingDate(cell.dateStr);
-        setExamInput('');
+        setPendingDate(cell.dateStr === pendingDate ? null : cell.dateStr);
+        setNoteInput('');
     };
 
-    const handleSetExam = () => {
-        if (!pendingDate || !examInput.trim()) return;
-        onExamSet(pendingDate, examInput.trim());
-        setPendingDate(null);
-        setExamInput('');
+    const handleAddNote = () => {
+        if (!pendingDate || !noteInput.trim()) return;
+        onNoteAdd(pendingDate, noteInput.trim());
+        setNoteInput('');
+    };
+
+    const handleDeleteNote = (id) => {
+        onNoteDelete(id);
     };
 
     const dotCls = (count) => {
@@ -87,7 +98,7 @@ const SmartCalendar = ({ heatmapData = [], forecastData = [], examDate, examName
         if (!cell.inMonth)              c.push('sc-day--out');
         if (cell.isToday)               c.push('sc-day--today');
         if (cell.inMonth && !cell.past && !cell.isToday) c.push('sc-day--future');
-        if (cell.dateStr === examDate && cell.inMonth)   c.push('sc-day--exam');
+        if (notesByDate[cell.dateStr] && cell.inMonth && !cell.past) c.push('sc-day--has-note');
         if (cell.dateStr === pendingDate)                 c.push('sc-day--pending');
         return c.join(' ');
     };
@@ -118,28 +129,43 @@ const SmartCalendar = ({ heatmapData = [], forecastData = [], examDate, examName
                         {cell.inMonth && cell.past && dotCls(studyByDate[cell.dateStr]) && (
                             <span className={dotCls(studyByDate[cell.dateStr])} />
                         )}
+                        {cell.inMonth && !cell.past && !cell.isToday && notesByDate[cell.dateStr] && (
+                            <span className="sc-note-dot" />
+                        )}
                     </div>
                 ))}
             </div>
 
-            {/* Exam-date setter form */}
+            {/* Note form */}
             {pendingDate && (
                 <div className="sc-form">
-                    <p className="sc-form-label">Set exam for <strong>{fmtFull(pendingDate)}</strong></p>
+                    <p className="sc-form-label">Notes for <strong>{fmtFull(pendingDate)}</strong></p>
+
+                    {(notesByDate[pendingDate] || []).length > 0 && (
+                        <ul className="sc-notes-list">
+                            {(notesByDate[pendingDate] || []).map(note => (
+                                <li key={note.id} className="sc-note-item">
+                                    <span className="sc-note-text">{note.text}</span>
+                                    <button className="sc-note-delete" onClick={() => handleDeleteNote(note.id)} title="Remove">✕</button>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+
                     <input
                         className="sc-form-input"
-                        placeholder="Exam name (e.g. Geomechanics Final)"
-                        value={examInput}
-                        onChange={e => setExamInput(e.target.value)}
-                        onKeyDown={e => e.key === 'Enter' && handleSetExam()}
+                        placeholder="Add a note (e.g. Exam, Meeting, Deadline…)"
+                        value={noteInput}
+                        onChange={e => setNoteInput(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && handleAddNote()}
                         autoFocus
                     />
                     <div className="sc-form-row">
-                        <button className="sc-form-btn sc-form-btn--set" onClick={handleSetExam} disabled={!examInput.trim()}>
-                            Set Exam Date
+                        <button className="sc-form-btn sc-form-btn--set" onClick={handleAddNote} disabled={!noteInput.trim()}>
+                            Add Note
                         </button>
                         <button className="sc-form-btn sc-form-btn--cancel" onClick={() => setPendingDate(null)}>
-                            Cancel
+                            Close
                         </button>
                     </div>
                 </div>
@@ -151,11 +177,7 @@ const SmartCalendar = ({ heatmapData = [], forecastData = [], examDate, examName
                     <span className="sc-dot sc-dot--mid"   /> <span>11–30 cards</span>
                     <span className="sc-dot sc-dot--dark"  /> <span>30+ cards</span>
                 </div>
-                <p className="sc-hint">
-                    {examDate && examName
-                        ? `Exam: ${examName} · ${fmtFull(examDate)} — click to remove`
-                        : 'Click a future date to set an exam target'}
-                </p>
+                <p className="sc-hint">Click a future date to add or view notes</p>
             </div>
         </div>
     );
