@@ -329,10 +329,12 @@ const Dashboard = ({ user }) => {
                                                 </div>
                                                 <div className="db-deck-count">{count} card{count !== 1 ? 's' : ''}</div>
                                                 <div className="db-deck-actions">
-                                                    <button className="db-btn db-btn--study"  onClick={() => navigate(dest, { state: st })}>▶ Study</button>
+                                                    <button className="db-btn db-btn--study" onClick={() => navigate(dest, { state: st })}>▶ Study</button>
+                                                </div>
+                                                <div className="db-deck-icon-row">
                                                     <button className="db-btn db-btn--manage" onClick={() => navigate(dest, { state: st })} title="Manage Cards">⚙️</button>
                                                     <button className="db-btn db-btn--manage" onClick={() => handleStartEditDeck(deck)} title="Edit Deck">✏️</button>
-                                                    <button className="db-del-btn"            onClick={() => handleDeleteDeck(id)}>🗑️</button>
+                                                    <button className="db-del-btn" onClick={() => handleDeleteDeck(id)}>🗑️</button>
                                                 </div>
                                             </>
                                         )}

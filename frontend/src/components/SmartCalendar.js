@@ -4,7 +4,12 @@ import './SmartCalendar.css';
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-const toStr = (d) => d.toISOString().slice(0, 10);
+const toStr = (d) => {
+    const y  = d.getFullYear();
+    const m  = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${dd}`;
+};
 const todayISO = () => toStr(new Date());
 const normalizeDate = (d) => String(d || '').slice(0, 10);
 

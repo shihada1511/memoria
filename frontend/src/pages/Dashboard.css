@@ -264,6 +264,16 @@
     margin-top: 4px;
 }
 
+.db-deck-actions .db-btn--study {
+    flex: 1;
+}
+
+.db-deck-icon-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
 .db-deck-edit-form {
     display: flex;
     flex-direction: column;
